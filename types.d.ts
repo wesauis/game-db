@@ -1,13 +1,26 @@
-import type * as gameStores from './stores/all.ts'
+import type * as providers from './offer_providers/all.ts'
 
 export interface GameOffer {
-  store: keyof typeof gameStores
-  name: string
-  description: string
-  price: [number, number] // original, actual
-  discount: number
-  link: string
-  ended: boolean
+  /** Registered Offer Provider */
+  provider: keyof typeof providers      
+  /** Game title */
+  title: string                       
+  price: {            
+    /** Original Price */
+    original: number,                 
+    /** Price with discount */
+    actual: number,                   
+    /** Discount Percentage */
+    discount: number                  
+    /** Currency code: 'USD', 'BRL' */
+    currencyCode: string              
+  }
+  /** Offer link */
+  link: string                        
+  /** when the promo started / when was found */
+  from?: Date                         
+  /** when the promo ended / when was not found */
+  to?: Date                           
 }
 
-export type GameStore = () => Promise<GameOffer[]>
+export type OfferProvider = () => Promise<GameOffer[]>

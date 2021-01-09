@@ -1,16 +1,16 @@
 import { parseArgs } from "./deps.ts";
-import * as gameStores from './stores/all.ts'
+import * as providers from './offer_providers/all.ts'
 
 if (import.meta.main) {
   const args = parseArgs(Deno.args)
 
-  Object.entries(gameStores).forEach(([name, gameStore]) => {
-    console.log(`finding games at ${name}`)
-    
-    gameStore()
+  const offers = await Promise
+    .all(Object 
+      .values(providers)
+      .map(provider => provider()))     // query all offers
+    .then(offers => offers.flat())      // join the results
+    .then(offers => offers              // order by discount, descending
+      .sort((a, b) => b.price.discount - a.price.discount))
 
-    console.log()
-  })
+  console.log(offers)
 }
-
-
