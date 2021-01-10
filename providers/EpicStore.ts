@@ -20,7 +20,7 @@ function toOffer(offer: Element): GameOffer {
   };
 }
 
-export const EpicStore: OfferProvider = async () => {
+const EpicStore: OfferProvider = async () => {
   try {
     const offers = await fetch("https://www.epicgames.com/graphql", {
       "headers": {
@@ -45,7 +45,9 @@ export const EpicStore: OfferProvider = async () => {
 
     return offers.data.Catalog.searchStore.elements.map(toOffer);
   } catch (error) {
-    logRequestError("EpicStore", error);
+    logRequestError(import.meta, error);
     return [];
   }
 };
+
+export default EpicStore;
