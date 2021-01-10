@@ -1,4 +1,5 @@
 # Game DB
+
 _find free or really good game offers_
 
 # Installation

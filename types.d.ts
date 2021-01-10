@@ -1,26 +1,27 @@
-import type * as providers from './offer_providers/mod.ts'
+import type * as providers from "./providers/mod.ts";
 
 export interface GameOffer {
   /** Registered Offer Provider */
-  provider: keyof typeof providers      
+  provider: keyof typeof providers;
   /** Game title */
-  title: string                       
-  price: {            
-    /** Original Price */
-    original: number,                 
-    /** Price with discount */
-    actual: number,                   
-    /** Discount Percentage */
-    discount: number                  
-    /** Currency code: 'USD', 'BRL' */
-    currencyCode: string              
-  }
+  title: string;
+  /** Offer pricing */
+  price: GameOfferPrice;
   /** Offer link */
-  link: string                        
-  /** when the promo started / when was found */
-  from?: Date                         
-  /** when the promo ended / when was not found */
-  to?: Date                           
+  link: string;
+  /** If the offer is ended */
+  ended: boolean;
 }
 
-export type OfferProvider = () => Promise<GameOffer[]>
+export interface GameOfferPrice {
+  /** Original Price */
+  original: number;
+  /** Price with discount */
+  actual: number;
+  /** Discount Percentage */
+  discount: number;
+  /** Currency code: 'USD', 'BRL' */
+  currencyCode: string;
+}
+
+export type OfferProvider = () => Promise<GameOffer[]>;

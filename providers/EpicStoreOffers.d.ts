@@ -1,42 +1,42 @@
-export default interface EpicStorePromos {
+export default interface EpicStoreOffers {
   data: Data;
   extensions: Extensions;
 }
 
-interface Extensions {
+export interface Extensions {
   cacheControl: CacheControl;
 }
 
-interface CacheControl {
+export interface CacheControl {
   version: number;
   hints: Hint[];
 }
 
-interface Hint {
+export interface Hint {
   path: (number | string | string)[];
   maxAge: number;
   scope?: string;
 }
 
-interface Data {
+export interface Data {
   Catalog: Catalog;
 }
 
-interface Catalog {
+export interface Catalog {
   searchStore: SearchStore;
 }
 
-interface SearchStore {
+export interface SearchStore {
   elements: Element[];
   paging: Paging;
 }
 
-interface Paging {
+export interface Paging {
   count: number;
   total: number;
 }
 
-interface Element {
+export interface Element {
   title: string;
   id: string;
   namespace: string;
@@ -55,26 +55,26 @@ interface Element {
   price: Price;
 }
 
-interface Price {
+export interface Price {
   totalPrice: TotalPrice;
   lineOffers: LineOffer[];
 }
 
-interface LineOffer {
+export interface LineOffer {
   appliedRules: AppliedRule[];
 }
 
-interface AppliedRule {
+export interface AppliedRule {
   id: string;
   endDate: string;
   discountSetting: DiscountSetting;
 }
 
-interface DiscountSetting {
+export interface DiscountSetting {
   discountType: string;
 }
 
-interface TotalPrice {
+export interface TotalPrice {
   discountPrice: number;
   originalPrice: number;
   voucherDiscount: number;
@@ -84,40 +84,40 @@ interface TotalPrice {
   fmtPrice: FmtPrice;
 }
 
-interface FmtPrice {
+export interface FmtPrice {
   originalPrice: string;
   discountPrice: string;
   intermediatePrice: string;
 }
 
-interface CurrencyInfo {
+export interface CurrencyInfo {
   decimals: number;
 }
 
-interface Category {
+export interface Category {
   path: string;
 }
 
-interface CustomAttribute {
+export interface CustomAttribute {
   key: string;
   value: string;
 }
 
-interface Item {
+export interface Item {
   id: string;
   namespace: string;
 }
 
-interface Tag {
+export interface Tag {
   id: string;
 }
 
-interface Seller {
+export interface Seller {
   id: string;
   name: string;
 }
 
-interface KeyImage {
+export interface KeyImage {
   type: string;
   url: string;
 }
