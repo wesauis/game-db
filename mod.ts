@@ -1,9 +1,6 @@
-import { parseArgs } from "./deps.ts";
 import * as providers from './offer_providers/mod.ts'
 
 if (import.meta.main) {
-  const args = parseArgs(Deno.args)
-
   const offers = await Promise
     .all(Object 
       .values(providers)

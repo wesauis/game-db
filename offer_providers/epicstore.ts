@@ -1,7 +1,7 @@
 import { GameOffer, OfferProvider } from '../types.d.ts'
-import EpicStorePromos from './epicstore.d.ts'
+import EpicStorePromos, { Element } from './epicstore.d.ts'
 import { getJSON } from '../utils.ts'
-import { networkError } from '../logger.ts'
+import { logRequestError } from '../logger.ts'
 
 function fetchPromotions(): Promise<EpicStorePromos> {
   return fetch("https://www.epicgames.com/graphql", {
@@ -24,37 +24,44 @@ function fetchPromotions(): Promise<EpicStorePromos> {
   .then(res => getJSON<EpicStorePromos>(res))
 }
 
+function parseDate(date: string | undefined): Date | undefined {
+  return date ? new Date(date) : new Date()
+}
+
+function parsePromotion(promo: Element): GameOffer {
+  const { title, productSlug } = promo
+  const { totalPrice: { originalPrice, discountPrice, currencyCode }, lineOffers } = promo.price
+
+  const original = originalPrice / 100
+  const actual = discountPrice / 100
+  const discount = Math.abs((actual - original) / original * 100);
+
+  return {
+    provider: 'EpicStore',
+    title,
+    price: {
+      original,
+      actual,
+      discount,
+      currencyCode,
+    },
+    from: parseDate(promo.effectiveDate),
+    to: parseDate(lineOffers[0]?.appliedRules[0]?.endDate),
+    link: `https://www.epicgames.com/store/en-US/product/${productSlug}`
+  }
+}
+
 export const EpicStore: OfferProvider = async () => {
   try {
+
     const promos = await fetchPromotions()
 
-    return promos.data.Catalog.searchStore.elements
-      .map(el => {
-        const { title, productSlug, effectiveDate } = el
-        const { totalPrice: { originalPrice, discountPrice, currencyCode }, lineOffers } = el.price
+    return promos.data.Catalog.searchStore.elements.map(parsePromotion)
 
-        const original = originalPrice / 100
-        const actual = discountPrice / 100
-        const discount = Math.abs((actual - original) / original * 100);
-
-        const endDateStr = lineOffers[0]?.appliedRules[0]?.endDate
-
-        return {
-          provider: 'EpicStore',
-          title,
-          price: {
-            original,
-            actual,
-            discount,
-            currencyCode: currencyCode,
-          },
-          from: effectiveDate ? new Date(effectiveDate) : new Date(),
-          to: endDateStr ? new Date(endDateStr) : new Date(),
-          link: `https://www.epicgames.com/store/en-US/product/${productSlug}`
-        } as GameOffer
-    })
   } catch(error) {
-    networkError('EpicStorePromotions', error)
+
+    logRequestError('EpicStore', error)
     return []
+
   }
 }
