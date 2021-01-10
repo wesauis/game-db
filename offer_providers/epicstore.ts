@@ -50,7 +50,7 @@ export const EpicStore: OfferProvider = async () => {
           },
           from: effectiveDate ? new Date(effectiveDate) : new Date(),
           to: endDateStr ? new Date(endDateStr) : new Date(),
-          link: `https://www.epicgames.com/store/en-US/product/${productSlug}/home`
+          link: `https://www.epicgames.com/store/en-US/product/${productSlug}`
         } as GameOffer
     })
   } catch(error) {

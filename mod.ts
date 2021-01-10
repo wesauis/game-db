@@ -13,5 +13,4 @@ if (import.meta.main) {
       .sort((a, b) => b.price.discount - a.price.discount))
 
   console.log(offers)
-  console.log(JSON.stringify(offers, undefined, 2))
 }
