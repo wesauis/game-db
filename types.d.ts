@@ -1,4 +1,4 @@
-import type * as providers from './offer_providers/all.ts'
+import type * as providers from './offer_providers/mod.ts'
 
 export interface GameOffer {
   /** Registered Offer Provider */

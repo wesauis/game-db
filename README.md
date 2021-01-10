@@ -1,9 +1,19 @@
 # Game DB
 _find free or really good game offers_
 
-# [Installation](./INSTALL.md)
+# Installation
 
-# [Commands](./COMMANDS.md)
+## Windows (Powershell)
+
+```ps1
+deno install mod.ts
+```
+
+## Unix (sh)
+
+```sh
+deno install mod.ts
+```
 
 # More
 

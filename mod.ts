@@ -1,5 +1,5 @@
 import { parseArgs } from "./deps.ts";
-import * as providers from './offer_providers/all.ts'
+import * as providers from './offer_providers/mod.ts'
 
 if (import.meta.main) {
   const args = parseArgs(Deno.args)
@@ -13,4 +13,5 @@ if (import.meta.main) {
       .sort((a, b) => b.price.discount - a.price.discount))
 
   console.log(offers)
+  console.log(JSON.stringify(offers, undefined, 2))
 }
