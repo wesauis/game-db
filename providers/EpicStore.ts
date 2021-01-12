@@ -1,7 +1,8 @@
-import { GameOffer, OfferProvider } from "../types.d.ts";
-import EpicStoreOffers, { Element } from "./EpicStoreOffers.d.ts";
-import { parseJSON } from "../utils.ts";
-import { logRequestError } from "../logger.ts";
+import type EpicStoreOffers from "../types/EpicStoreOffers.d.ts";
+import type { Element } from "../types/EpicStoreOffers.d.ts";
+import type { GameOffer, OfferProvider } from "../types/types.d.ts";
+import logger from "../logging/logger.ts";
+import { parseResJson } from "../utils/parsers.ts";
 
 function toOffer(offer: Element): GameOffer {
   const { title, productSlug } = offer;
@@ -16,7 +17,6 @@ function toOffer(offer: Element): GameOffer {
     title,
     price: { original, actual, discount, currencyCode },
     link: `https://www.epicgames.com/store/en-US/product/${productSlug}`,
-    ended: false,
   };
 }
 
@@ -41,13 +41,14 @@ const EpicStore: OfferProvider = async () => {
       "mode": "cors",
       "credentials": "include",
     })
-      .then(parseJSON<EpicStoreOffers>());
+      .then(parseResJson<EpicStoreOffers>());
 
     return offers.data.Catalog.searchStore.elements.map(toOffer);
   } catch (error) {
-    logRequestError(import.meta, error);
-    return [];
+    logger.requestError(import.meta, error);
   }
+
+  return [];
 };
 
 export default EpicStore;

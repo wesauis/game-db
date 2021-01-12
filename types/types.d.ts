@@ -1,4 +1,4 @@
-import type * as providers from "./providers/_.ts";
+import type * as providers from "../providers/_.ts";
 
 export interface GameOffer {
   /** Registered Offer Provider */
@@ -9,8 +9,6 @@ export interface GameOffer {
   price: GameOfferPrice;
   /** Offer link */
   link: string;
-  /** If the offer is ended */
-  ended: boolean;
 }
 
 export interface GameOfferPrice {
