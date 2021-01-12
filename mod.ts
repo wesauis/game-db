@@ -1,9 +1,10 @@
-import { EpicStore, Steam } from "./providers/_.ts";
+import { EpicStore, EpicStoreFree, Steam } from "./providers/_.ts";
 
 if (import.meta.main) {
   const offers = await Promise.all([
     EpicStore(),
     Steam(),
+    EpicStoreFree(),
   ])
     // join the results
     .then((offers) => offers.flat())
