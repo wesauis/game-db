@@ -43,9 +43,6 @@ export function parseNum(price: Element | string | null) {
   return parsed;
 }
 
-export function parseElements<T>(
-  nodeList: NodeList,
-  map: (value: Element, index: number, array: Element[]) => T,
-): T[] {
-  return Array.from(nodeList as Iterable<Element>).map(map);
+export function parseElements(nodeList: NodeList): Element[] {
+  return Array.from(nodeList as Iterable<Element>);
 }

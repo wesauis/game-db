@@ -36,7 +36,7 @@ const Steam: OfferProvider = async () => {
       throw new Error("no results");
     }
 
-    return parseElements($promotions, toOffer);
+    return parseElements($promotions).map(toOffer);
   } catch (error) {
     logger.requestError(import.meta, error);
   }
