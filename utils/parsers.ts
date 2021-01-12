@@ -27,9 +27,9 @@ export function parseNum(price: Element | string | null) {
 
   // replace last comma with a dot
   const index = normalized?.lastIndexOf(",");
-  if (index && index !== -1 && normalized) {
-    const l = normalized.substring(0, index);
-    const r = normalized.substring(index + 1);
+  if (index != null && index !== -1) {
+    const l = normalized!.substring(0, index);
+    const r = normalized!.substring(index + 1);
     normalized = `${l}.${r}`;
   }
 

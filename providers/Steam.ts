@@ -5,14 +5,14 @@ import type { GameOffer, OfferProvider } from "../types/types.d.ts";
 import { parseElements, parseNum, parseResText } from "../utils/parsers.ts";
 
 function toOffer(el: Element): GameOffer {
-  const $title = el.querySelector(".title") as Element;
-  const $actual = el.querySelector(".search_price") as Element;
-  const $original = el.querySelector("strike") as Element;
-  const $discount = el.querySelector(".search_discount span") as Element;
+  const $title = el.querySelector(".title");
+  const $actual = el.querySelector(".search_price");
+  const $original = el.querySelector("strike");
+  const $discount = el.querySelector(".search_discount span");
 
   return {
     provider: "Steam",
-    title: $title.textContent,
+    title: $title!.textContent,
     price: {
       original: parseNum($original),
       actual: parseNum($actual),
@@ -30,11 +30,8 @@ const Steam: OfferProvider = async () => {
     ).then(parseResText);
 
     const $promotions = new DOMParser()
-      .parseFromString(html, "text/html")
-      ?.querySelectorAll(".search_result_row");
-    if (!$promotions) {
-      throw new Error("no results");
-    }
+      .parseFromString(html, "text/html")!
+      .querySelectorAll(".search_result_row");
 
     return parseElements($promotions).map(toOffer);
   } catch (error) {
