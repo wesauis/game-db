@@ -1,7 +1,7 @@
 import type { Element } from "../deps.ts";
 import { DOMParser } from "../deps.ts";
 import logger from "../logging/logger.ts";
-import type { GameOffer, OfferProvider } from "../types/types.d.ts";
+import type { GameOffer } from "../types/types.d.ts";
 import { parseElements, parseNum, parseResText } from "../utils/parsers.ts";
 
 function toOffer(el: Element): GameOffer {
@@ -23,7 +23,7 @@ function toOffer(el: Element): GameOffer {
   };
 }
 
-const Steam: OfferProvider = async () => {
+export default async function Steam(): Promise<GameOffer[]> {
   try {
     const html = await fetch(
       "https://store.steampowered.com/search/?sort_by=Reviews_DESC&specials=1",
@@ -39,6 +39,4 @@ const Steam: OfferProvider = async () => {
   }
 
   return [];
-};
-
-export default Steam;
+}

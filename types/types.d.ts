@@ -1,8 +1,8 @@
-import type * as providers from "../providers/_.ts";
+import type { RegisteredProviders } from "../providers/registry.ts";
 
 export interface GameOffer {
   /** Registered Offer Provider */
-  provider: keyof typeof providers;
+  provider: RegisteredProviders;
   /** Game title */
   title: string;
   /** Offer pricing */
@@ -21,5 +21,3 @@ export interface GameOfferPrice {
   /** Currency code: 'USD', 'BRL' */
   currencyCode: string;
 }
-
-export type OfferProvider = () => Promise<GameOffer[]>;

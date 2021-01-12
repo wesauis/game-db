@@ -1,7 +1,7 @@
+import logger from "../logging/logger.ts";
 import type EpicStoreOffers from "../types/EpicStoreOffers.d.ts";
 import type { Element } from "../types/EpicStoreOffers.d.ts";
-import type { GameOffer, OfferProvider } from "../types/types.d.ts";
-import logger from "../logging/logger.ts";
+import type { GameOffer } from "../types/types.d.ts";
 import { parseResJson } from "../utils/parsers.ts";
 
 function toOffer(offer: Element): GameOffer {
@@ -20,7 +20,7 @@ function toOffer(offer: Element): GameOffer {
   };
 }
 
-const EpicStore: OfferProvider = async () => {
+export default async function EpicStore(): Promise<GameOffer[]> {
   try {
     const offers = await fetch("https://www.epicgames.com/graphql", {
       "headers": {
@@ -49,6 +49,4 @@ const EpicStore: OfferProvider = async () => {
   }
 
   return [];
-};
-
-export default EpicStore;
+}

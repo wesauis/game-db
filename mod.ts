@@ -1,11 +1,11 @@
-import { EpicStore, EpicStoreFree, Steam } from "./providers/_.ts";
+import providers from "./providers/registry.ts";
 
 if (import.meta.main) {
-  const offers = await Promise.all([
-    EpicStore(),
-    Steam(),
-    EpicStoreFree(),
-  ])
+  const offers = await Promise.all(
+    Object
+      .values(providers)
+      .map((find) => find()),
+  )
     // join the results
     .then((offers) => offers.flat())
     // order by discount, descending

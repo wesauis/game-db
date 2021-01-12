@@ -1,7 +1,7 @@
 import type { Element } from "../deps.ts";
 import { DOMParser } from "../deps.ts";
 import logger from "../logging/logger.ts";
-import type { GameOffer, OfferProvider } from "../types/types.d.ts";
+import type { GameOffer } from "../types/types.d.ts";
 import { parseElements, parseResText } from "../utils/parsers.ts";
 
 function toOffer(el: Element): GameOffer {
@@ -22,7 +22,7 @@ function toOffer(el: Element): GameOffer {
   };
 }
 
-const EpicStoreFree: OfferProvider = async () => {
+export default async function EpicStoreFree(): Promise<GameOffer[]> {
   try {
     const html = await fetch(
       "https://www.epicgames.com/store/en-US/free-games",
@@ -38,6 +38,4 @@ const EpicStoreFree: OfferProvider = async () => {
   }
 
   return [];
-};
-
-export default EpicStoreFree;
+}
