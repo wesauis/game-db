@@ -17,7 +17,3 @@ deno install mod.ts
 ```sh
 deno install mod.ts
 ```
-
-# More
-
-- [Todos](./TODO.md)
