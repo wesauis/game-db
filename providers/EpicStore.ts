@@ -1,6 +1,6 @@
 import logger from "../logging/logger.ts";
-import type EpicStoreOffers from "../types/EpicStoreOffers.d.ts";
-import type { Element } from "../types/EpicStoreOffers.d.ts";
+import type EpicStore from "../types/EpicStore.d.ts";
+import type { Element } from "../types/EpicStore.d.ts";
 import type { GameOffer } from "../types/types.d.ts";
 import { parseResJson } from "../utils/parsers.ts";
 
@@ -41,7 +41,7 @@ export default async function EpicStore(): Promise<GameOffer[]> {
       "mode": "cors",
       "credentials": "include",
     })
-      .then(parseResJson<EpicStoreOffers>());
+      .then(parseResJson<EpicStore>());
 
     return offers.data.Catalog.searchStore.elements.map(toOffer);
   } catch (error) {

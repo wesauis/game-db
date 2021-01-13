@@ -19,11 +19,11 @@ export function parseResText(res: Response): Promise<string> {
   }
 }
 
-export function parseNum(price: Element | string | null) {
+export function parseNum(price: Element | string | null, comma = ",") {
   const raw = !price || typeof price === "string" ? price : textOf(price);
 
   // remove non numbers or commas
-  let normalized = raw?.replaceAll(/[^0-9,]+/g, "");
+  let normalized = raw?.replaceAll(new RegExp(`[^0-9${comma[0]}]+`, "g"), "");
 
   // replace last comma with a dot
   const index = normalized?.lastIndexOf(",");

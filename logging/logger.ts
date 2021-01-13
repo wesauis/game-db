@@ -1,7 +1,7 @@
-import * as log from "https://deno.land/std@0.83.0/log/mod.ts";
+import { getLogger, Logger } from "../deps.ts";
 import { STATUS_CODES } from "./status.ts";
 
-const logger = log.getLogger() as log.Logger & {
+const logger = getLogger() as Logger & {
   requestError: typeof requestError;
 };
 
