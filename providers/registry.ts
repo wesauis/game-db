@@ -1,4 +1,4 @@
-import type { GameOffer } from "../types/types.d.ts";
+import type GameOffer from "../types/GameOffer.d.ts";
 import EpicStore from "./EpicStore.ts";
 import EpicStoreFree from "./EpicStoreFree.ts";
 import GoG from "./GoG.ts";

@@ -1,22 +1,22 @@
 import logger from "../logging/logger.ts";
 import type EpicStore from "../types/EpicStore.d.ts";
 import type { Element } from "../types/EpicStore.d.ts";
-import type { GameOffer } from "../types/types.d.ts";
+import type GameOffer from "../types/GameOffer.d.ts";
 import { parseResJson } from "../utils/parsers.ts";
 
 function toOffer(offer: Element): GameOffer {
-  const { title, productSlug } = offer;
-  const { originalPrice, discountPrice, currencyCode } = offer.price.totalPrice;
+  const { originalPrice, discountPrice } = offer.price.totalPrice;
 
-  const original = originalPrice / 100;
-  const actual = discountPrice / 100;
-  const discount = (original - actual) / original * 100;
+  const base = originalPrice / 100;
+  const final = discountPrice / 100;
+  const discount = (base - final) / base * 100;
 
   return {
     provider: "EpicStore",
-    title,
-    price: { original, actual, discount, currencyCode },
-    link: `https://www.epicgames.com/store/en-US/product/${productSlug}`,
+    publisher: offer.seller.name,
+    title: offer.title,
+    price: { base, final, discount },
+    link: `https://www.epicgames.com/store/en-US/product/${offer.productSlug}`,
   };
 }
 

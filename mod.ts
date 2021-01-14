@@ -10,7 +10,9 @@ if (import.meta.main) {
     .then((offers) => offers.flat())
     // order by discount, descending
     .then((offers) =>
-      offers.sort((a, b) => b.price.discount - a.price.discount)
+      offers.sort((a, b) =>
+        (b.price?.discount || 100) - (a.price?.discount || 100)
+      )
     );
 
   console.log(JSON.stringify(offers, undefined, 2));

@@ -1,21 +1,14 @@
-// https://www.gog.com/games/ajax/filtered?mediaType=game&page=1&price=free&sort=rating
-// get all pages
 import logger from "../logging/logger.ts";
+import type GameOffer from "../types/GameOffer.d.ts";
 import type GoG from "../types/GoG.d.ts";
 import type { Product } from "../types/GoG.d.ts";
-import { GameOffer } from "../types/types.d.ts";
 import { parseResJson } from "../utils/parsers.ts";
 
 function toOffer(product: Product): GameOffer {
   return {
     provider: "GoGFree",
     title: product.title,
-    price: {
-      original: 0,
-      actual: 0,
-      discount: 100,
-      currencyCode: "*",
-    },
+    publisher: product.publisher,
     link: `https://www.gog.com${product.url}`,
   };
 }

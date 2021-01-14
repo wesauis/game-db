@@ -1,23 +1,24 @@
 import type { Element } from "../deps.ts";
 import { DOMParser } from "../deps.ts";
 import logger from "../logging/logger.ts";
-import type { GameOffer } from "../types/types.d.ts";
+import type GameOffer from "../types/GameOffer.d.ts";
 import { parseElements, parseNum, parseResText } from "../utils/parsers.ts";
 
 function toOffer(el: Element): GameOffer {
   const $title = el.querySelector(".title");
-  const $actual = el.querySelector(".search_price");
-  const $original = el.querySelector("strike");
   const $discount = el.querySelector(".search_discount span");
+
+  const [, base_, final_] = el
+    .querySelector(".search_price")!
+    .textContent.split("R$");
 
   return {
     provider: "Steam",
     title: $title!.textContent,
     price: {
-      original: parseNum($original),
-      actual: parseNum($actual),
-      discount: parseNum($discount),
-      currencyCode: "BRL",
+      base: parseNum(base_),
+      final: parseNum(final_),
+      discount: parseNum($discount!.textContent),
     },
     link: el.attributes["href"],
   };
@@ -26,7 +27,7 @@ function toOffer(el: Element): GameOffer {
 export default async function Steam(): Promise<GameOffer[]> {
   try {
     const html = await fetch(
-      "https://store.steampowered.com/search/?sort_by=Reviews_DESC&specials=1",
+      "https://store.steampowered.com/search/?sort_by=Reviews_DESC&category1=998&specials=1",
     ).then(parseResText);
 
     const $promotions = new DOMParser()

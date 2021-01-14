@@ -1,18 +1,18 @@
 import logger from "../logging/logger.ts";
+import type GameOffer from "../types/GameOffer.d.ts";
 import type GoG from "../types/GoG.d.ts";
 import type { Product } from "../types/GoG.d.ts";
-import { GameOffer } from "../types/types.d.ts";
 import { parseNum, parseResJson } from "../utils/parsers.ts";
 
 function toOffer(product: Product): GameOffer {
   return {
     provider: "GoG",
     title: product.title,
+    publisher: product.publisher,
     price: {
-      original: parseNum(product.price.baseAmount, "."),
-      actual: parseNum(product.price.finalAmount, "."),
+      base: parseNum(product.price.baseAmount, "."),
+      final: parseNum(product.price.finalAmount, "."),
       discount: product.price.discountPercentage,
-      currencyCode: "BRL",
     },
     link: `https://www.gog.com${product.url}`,
   };

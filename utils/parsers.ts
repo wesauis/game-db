@@ -1,5 +1,4 @@
 import type { Element, NodeList } from "../deps.ts";
-import { textOf } from "./utils.ts";
 
 export function parseResJson<T>() {
   return (res: Response): Promise<T> => {
@@ -19,11 +18,9 @@ export function parseResText(res: Response): Promise<string> {
   }
 }
 
-export function parseNum(price: Element | string | null, comma = ",") {
-  const raw = !price || typeof price === "string" ? price : textOf(price);
-
+export function parseNum(price: string | null, comma = ",") {
   // remove non numbers or commas
-  let normalized = raw?.replaceAll(new RegExp(`[^0-9${comma[0]}]+`, "g"), "");
+  let normalized = price?.replaceAll(new RegExp(`[^0-9${comma[0]}]+`, "g"), "");
 
   // replace last comma with a dot
   const index = normalized?.lastIndexOf(",");

@@ -1,24 +1,22 @@
 import type { Element } from "../deps.ts";
 import { DOMParser } from "../deps.ts";
 import logger from "../logging/logger.ts";
-import type { GameOffer } from "../types/types.d.ts";
+import type GameOffer from "../types/GameOffer.d.ts";
 import { parseElements, parseResText } from "../utils/parsers.ts";
 
-function toOffer(el: Element): GameOffer {
-  const $title = el.querySelector(
-    'div[class$="OfferCard__meta"] span[data-testid="offer-title-info-title"]',
+function toOffer(element: Element): GameOffer {
+  const $title = element.querySelector(
+    'span[data-testid="offer-title-info-title"]',
+  );
+  const $publisher = element.querySelector(
+    'span[data-testid="offer-title-info-subtitle"]',
   );
 
   return {
     provider: "EpicStoreFree",
     title: $title!.textContent,
-    price: {
-      original: 0,
-      actual: 0,
-      discount: 100,
-      currencyCode: "*",
-    },
-    link: `https://www.epicgames.com${el.attributes["href"]}`,
+    publisher: $publisher!.textContent,
+    link: `https://www.epicgames.com${element.attributes.href}`,
   };
 }
 
