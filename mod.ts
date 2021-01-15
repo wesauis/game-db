@@ -1,12 +1,16 @@
-import providers from "./providers/registry.ts";
+import GoG from "./providers/GoG.ts";
+import GameOffer from "./types/GameOffer.d.ts";
 
-if (import.meta.main) {
-  const offers = await Promise.all(
-    Object
-      .values(providers)
-      .map((find) => find()),
-  )
-    // join the results
+export const providers = {
+  "gog": new GoG(),
+};
+
+export type RegisteredProviders = keyof typeof providers;
+
+async function queryOffers(): Promise<GameOffer[]> {
+  return await Promise.all(
+    Object.values(providers).map((provider) => provider.query()),
+  ) // join the results
     .then((offers) => offers.flat())
     // order by discount, descending
     .then((offers) =>
@@ -14,6 +18,8 @@ if (import.meta.main) {
         (b.price?.discount || 100) - (a.price?.discount || 100)
       )
     );
+}
 
-  console.log(JSON.stringify(offers, undefined, 2));
+if (import.meta.main) {
+  console.log(JSON.stringify(await queryOffers(), undefined, 2));
 }

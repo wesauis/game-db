@@ -1,4 +1,4 @@
-import { RegisteredProviders } from "../providers/registry.ts";
+import { RegisteredProviders } from "../mod.ts";
 
 export default interface GameOffer {
   provider: RegisteredProviders;

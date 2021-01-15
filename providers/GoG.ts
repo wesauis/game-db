@@ -1,49 +1,74 @@
 import logger from "../logging/logger.ts";
 import type GameOffer from "../types/GameOffer.d.ts";
-import type GoG from "../types/GoG.d.ts";
-import type { Product } from "../types/GoG.d.ts";
-import { parseNum, parseResJson } from "../utils/parsers.ts";
+import { parseResJson } from "../utils/parsers.ts";
+import { GameOfferProvider } from "./../types/GameOfferProvider.d.ts";
 
-function toOffer(product: Product): GameOffer {
-  return {
-    provider: "GoG",
-    title: product.title,
-    publisher: product.publisher,
-    price: {
-      base: parseNum(product.price.baseAmount, "."),
-      final: parseNum(product.price.finalAmount, "."),
-      discount: product.price.discountPercentage,
-    },
-    link: `https://www.gog.com${product.url}`,
-  };
+const GOG_API_URL =
+  "https://www.gog.com/games/ajax/filtered?mediaType=game&sort=rating";
+
+interface GoGResponse {
+  products: Product[];
+  totalPages: number;
 }
 
-export default async function GoGFree(): Promise<GameOffer[]> {
-  const params = new URLSearchParams({
-    mediaType: "game",
-    price: "discounted",
-    sort: "rating",
-  });
+interface Product {
+  title: string;
+  developer: string;
+  publisher: string;
+  price: {
+    baseAmount: string;
+    finalAmount: string;
+    discountPercentage: number;
+    isFree: boolean;
+  };
+  url: string;
+}
 
-  const offers: GoG[] = [];
+export default class GoG implements GameOfferProvider {
+  async fetchPages(pricing: "free" | "discounted"): Promise<GoGResponse[]> {
+    const pages: GoGResponse[] = [];
 
-  try {
-    let page = 1;
-    let offerPage: GoG;
-    do {
-      params.set("page", page.toFixed(0));
+    try {
+      let current = 1, total = 0;
 
-      offerPage = await fetch(
-        `https://www.gog.com/games/ajax/filtered?${params}`,
-      ).then(parseResJson<GoG>());
+      do {
+        const page = await fetch(`${GOG_API_URL}&price=${pricing}`)
+          .then(parseResJson<GoGResponse>());
 
-      offers.push(offerPage);
-    } while (page++ < offerPage.totalPages);
+        total = page.totalPages;
+        pages.push(page);
 
-    return offers.map((pg) => pg.products.map(toOffer)).flat();
-  } catch (error) {
-    logger.requestError(import.meta, error);
+        current += 1;
+      } while (current < total);
+    } catch (error) {
+      logger.requestError(import.meta, error);
+    }
+
+    return pages;
   }
 
-  return [];
+  async query(): Promise<GameOffer[]> {
+    const pages = await Promise.all([
+      this.fetchPages("free"),
+      this.fetchPages("discounted"),
+    ]);
+
+    const games = pages
+      .flat()
+      .map((page) => page.products)
+      .flat();
+
+    return games.map((game) => ({
+      provider: "gog",
+      title: game.title,
+      publisher: game.publisher,
+      developer: game.developer,
+      price: game.price.isFree ? undefined : {
+        base: Number(game.price.baseAmount),
+        final: Number(game.price.finalAmount),
+        discount: game.price.discountPercentage,
+      },
+      link: `https://www.gog.com${game.url}`,
+    }));
+  }
 }
