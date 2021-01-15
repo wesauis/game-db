@@ -6,12 +6,12 @@ import { GameOfferProvider } from "./../types/GameOfferProvider.d.ts";
 const GOG_API_URL =
   "https://www.gog.com/games/ajax/filtered?mediaType=game&sort=rating";
 
-interface GoGResponse {
-  products: Product[];
+interface GoGPage {
+  products: GoGGame[];
   totalPages: number;
 }
 
-interface Product {
+interface GoGGame {
   title: string;
   developer: string;
   publisher: string;
@@ -25,48 +25,10 @@ interface Product {
 }
 
 export default class GoG implements GameOfferProvider {
-  async fetchPages(pricing: "free" | "discounted"): Promise<GoGResponse[]> {
-    const pages: GoGResponse[] = [];
+  constructor(private readonly PRICING: "free" | "discounted") {}
 
-    try {
-      let current = 1, total = 0;
-
-      do {
-        const page = await fetch(`${GOG_API_URL}&price=${pricing}`)
-          .then(parseResJson<GoGResponse>());
-
-        total = page.totalPages;
-        pages.push(page);
-
-        logger.info(
-          import.meta,
-          `pricing: ${pricing}, page ${current} of ${total}, games: ${page.products.length}`,
-        );
-        current += 1;
-      } while (current < total);
-    } catch (error) {
-      logger.requestError(import.meta, error);
-    }
-
-    return pages;
-  }
-
-  async query(): Promise<GameOffer[]> {
-    logger.info(import.meta, "query started");
-
-    const pages = await Promise.all([
-      this.fetchPages("free"),
-      this.fetchPages("discounted"),
-    ]);
-
-    const games = pages
-      .flat()
-      .map((page) => page.products)
-      .flat();
-
-    logger.info(import.meta, `${games.length} games found`);
-
-    return games.map((game) => ({
+  private static parseGame(game: GoGGame): GameOffer {
+    return {
       provider: "gog",
       title: game.title,
       publisher: game.publisher,
@@ -77,6 +39,44 @@ export default class GoG implements GameOfferProvider {
         discount: game.price.discountPercentage,
       },
       link: `https://www.gog.com${game.url}`,
-    }));
+    };
+  }
+
+  async fetchGames() {
+    const games: GoGGame[][] = [];
+
+    try {
+      let current = 1, total = 0;
+
+      do {
+        const page = await fetch(
+          `${GOG_API_URL}&price=${this.PRICING}&page=${current}`,
+        ).then(parseResJson<GoGPage>());
+
+        total = page.totalPages;
+        games.push(page.products);
+
+        logger.info(
+          import.meta,
+          `pricing: ${this.PRICING}, page ${current} of ${total}, games: ${page.products.length}`,
+        );
+        current += 1;
+      } while (current < total);
+    } catch (error) {
+      logger.requestError(import.meta, error);
+    }
+
+    return games;
+  }
+
+  async query(): Promise<GameOffer[]> {
+    logger.info(import.meta, "query started");
+
+    const games = await this.fetchGames()
+      .then((pages) => pages.flat());
+
+    logger.info(import.meta, `${games.length} games found`);
+
+    return games.map(GoG.parseGame);
   }
 }
