@@ -38,6 +38,10 @@ export default class GoG implements GameOfferProvider {
         total = page.totalPages;
         pages.push(page);
 
+        logger.info(
+          import.meta,
+          `pricing: ${pricing}, page ${current} of ${total}, games: ${page.products.length}`,
+        );
         current += 1;
       } while (current < total);
     } catch (error) {
@@ -48,6 +52,8 @@ export default class GoG implements GameOfferProvider {
   }
 
   async query(): Promise<GameOffer[]> {
+    logger.info(import.meta, "query started");
+
     const pages = await Promise.all([
       this.fetchPages("free"),
       this.fetchPages("discounted"),
@@ -57,6 +63,8 @@ export default class GoG implements GameOfferProvider {
       .flat()
       .map((page) => page.products)
       .flat();
+
+    logger.info(import.meta, `${games.length} games found`);
 
     return games.map((game) => ({
       provider: "gog",
