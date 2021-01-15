@@ -1,6 +1,11 @@
 import { cyan, red, yellow } from "../deps.ts";
 import { STATUS_CODES } from "./status.ts";
 
+let enabled = true;
+export function disableLogger() {
+  enabled = false;
+}
+
 function prefix(meta: ImportMeta) {
   return `[${
     meta.url.substring(
@@ -13,18 +18,20 @@ function prefix(meta: ImportMeta) {
 }
 
 function info(meta: ImportMeta, arg1: unknown, ...args: unknown[]) {
-  console.info(cyan(prefix(meta)), arg1, ...args);
+  if (enabled) console.info(cyan(prefix(meta)), arg1, ...args);
 }
 
 function warn(meta: ImportMeta, arg1: unknown, ...args: unknown[]) {
-  console.warn(yellow(prefix(meta)), arg1, ...args);
+  if (enabled) console.warn(yellow(prefix(meta)), arg1, ...args);
 }
 
 function error(meta: ImportMeta, arg1: unknown, ...args: unknown[]) {
-  console.error(red(prefix(meta)), arg1, ...args);
+  if (enabled) console.error(red(prefix(meta)), arg1, ...args);
 }
 
 function requestError(meta: ImportMeta, error: Response | Error) {
+  if (!enabled) return;
+
   const prefix_ = red(prefix(meta));
 
   if ("status" in error) {
