@@ -7,10 +7,11 @@ import { GameOfferProvider } from "./types/GameOfferProvider.d.ts";
 export const providers = {
   free: {
     "gog": new GoG("free"),
+    "epic-store": new EpicStore("free"),
   },
   discounted: {
     "gog": new GoG("discounted"),
-    "epic-store": new EpicStore(),
+    "epic-store": new EpicStore("discounted"),
   },
 };
 
@@ -21,9 +22,9 @@ export type RegisteredProviders =
 async function queryOffers(
   providers: GameOfferProvider[],
 ): Promise<GameOffer[]> {
-  return await Promise.all(
-    providers.map((provider) => provider.query()),
-  ) // join the results
+  return await Promise
+    .all(providers.map((provider) => provider.query()))
+    // join the results
     .then((offers) => offers.flat());
 }
 

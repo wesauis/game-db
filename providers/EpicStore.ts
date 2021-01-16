@@ -7,26 +7,30 @@ const EPIC_API_URL = "https://www.epicgames.com/graphql";
 
 const EPIC_GRAPHQL_QUERY = `query searchStoreQuery(
   $category: String = "games/edition/base|bundles/games|editors|software/edition/base"
-  $onSale: Boolean = true
-
+  
   $allowCountries: String
   $country: String!
   $locale: String
-
+  
   $start: Int
   $count: Int
+
+  $onSale: Boolean
+  $freeGame: Boolean
 ) {
   Catalog {
     searchStore(
       category: $category
-      onSale: $onSale
-
+      
       allowCountries: $allowCountries
       country: $country
       locale: $locale
-
+      
       count: $count
       start: $start
+
+      onSale: $onSale
+      freeGame: $freeGame
     ) {
       elements {
         title
@@ -106,9 +110,11 @@ interface EpicGame {
 }
 
 export default class EpicStore implements GameOfferProvider {
-  logger = createLogger({ ...import.meta, suffix: undefined });
+  logger = createLogger({ ...import.meta, suffix: this.PRICING });
 
-  private static buildBody(page: number): string {
+  constructor(private readonly PRICING: "free" | "discounted") {}
+
+  private buildBody(page: number): string {
     return JSON.stringify(
       {
         query: EPIC_GRAPHQL_QUERY,
@@ -119,6 +125,9 @@ export default class EpicStore implements GameOfferProvider {
 
           start: Math.round(250 * page),
           count: 250,
+
+          onSale: this.PRICING === "discounted" ? true : null,
+          freeGame: this.PRICING === "free",
         },
       },
       undefined,
@@ -126,23 +135,28 @@ export default class EpicStore implements GameOfferProvider {
     );
   }
 
-  private static parseGame(game: EpicGame): GameOffer {
-    const {
-      originalPrice,
-      discountPrice,
-      currencyInfo: { decimals },
-    } = game.price.totalPrice;
+  private parseGame(game: EpicGame): GameOffer {
+    let price;
+    if (this.PRICING === "discounted") {
+      const {
+        originalPrice,
+        discountPrice,
+        currencyInfo: { decimals },
+      } = game.price.totalPrice;
 
-    const scale = 10 ** decimals;
-    const base = originalPrice / scale;
-    const final = discountPrice / scale;
-    const discount = (base - final) / base * 100;
+      const scale = 10 ** decimals;
+      const base = originalPrice / scale;
+      const final = discountPrice / scale;
+      const discount = (base - final) / base * 100;
+
+      price = { base, final, discount: Math.round(discount) };
+    }
 
     return {
       provider: "epic-store",
       title: game.title,
       publisher: game.seller.name,
-      price: { base, final, discount },
+      price,
       link: `https://www.epicgames.com/store/en-US/product/${game.productSlug}`,
     };
   }
@@ -161,7 +175,7 @@ export default class EpicStore implements GameOfferProvider {
             headers: {
               "content-type": "application/json;charset=UTF-8",
             },
-            body: EpicStore.buildBody(current),
+            body: this.buildBody(current),
           },
         ).then(parseResJson<EpicPage>());
 
@@ -188,7 +202,7 @@ export default class EpicStore implements GameOfferProvider {
 
     this.logger.info(`query ended: ${games.length} games found`);
 
-    return games.map(EpicStore.parseGame);
+    return games.map((game) => this.parseGame(game));
   }
 }
 
