@@ -44,7 +44,7 @@ export default class GoG implements GameOfferProvider {
     };
   }
 
-  async fetchGames() {
+  async fetchGames(): Promise<GoGGame[]> {
     const games: GoGGame[][] = [];
 
     try {
@@ -68,16 +68,15 @@ export default class GoG implements GameOfferProvider {
       this.logger.requestError(error);
     }
 
-    return games;
+    return games.flat();
   }
 
   async query(): Promise<GameOffer[]> {
     this.logger.info("query started");
 
-    const games = await this.fetchGames()
-      .then((pages) => pages.flat());
+    const games = await this.fetchGames();
 
-    this.logger.info(`DONE: ${games.length} games found`);
+    this.logger.info(`query ended: ${games.length} games found`);
 
     return games.map(GoG.parseGame);
   }

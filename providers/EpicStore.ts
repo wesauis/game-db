@@ -1,52 +1,211 @@
-import logger from "../logging/logger.ts";
-import type EpicStore from "../types/EpicStore.d.ts";
-import type { Element } from "../types/EpicStore.d.ts";
-import type GameOffer from "../types/GameOffer.d.ts";
+import { createLogger } from "../logging/logger.ts";
+import GameOffer from "../types/GameOffer.d.ts";
+import { GameOfferProvider } from "../types/GameOfferProvider.d.ts";
 import { parseResJson } from "../utils/parsers.ts";
 
-function toOffer(offer: Element): GameOffer {
-  const { originalPrice, discountPrice } = offer.price.totalPrice;
+const EPIC_API_URL = "https://www.epicgames.com/graphql";
 
-  const base = originalPrice / 100;
-  const final = discountPrice / 100;
-  const discount = (base - final) / base * 100;
+const EPIC_GRAPHQL_QUERY = `query searchStoreQuery(
+  $category: String = "games/edition/base|bundles/games|editors|software/edition/base"
+  $onSale: Boolean = true
 
-  return {
-    provider: "EpicStore",
-    publisher: offer.seller.name,
-    title: offer.title,
-    price: { base, final, discount },
-    link: `https://www.epicgames.com/store/en-US/product/${offer.productSlug}`,
+  $allowCountries: String
+  $country: String!
+  $locale: String
+
+  $start: Int
+  $count: Int
+) {
+  Catalog {
+    searchStore(
+      category: $category
+      onSale: $onSale
+
+      allowCountries: $allowCountries
+      country: $country
+      locale: $locale
+
+      count: $count
+      start: $start
+    ) {
+      elements {
+        title
+        seller {
+          name
+        }
+        productSlug
+        price(country: $country) {
+          totalPrice {
+            discountPrice
+            originalPrice
+            currencyInfo {
+              decimals
+            }
+          }
+        }
+        promotions(category: $category) @include(if: false) {
+          promotionalOffers {
+            promotionalOffers {
+              startDate
+              endDate
+              discountSetting {
+                discountType
+                discountPercentage
+              }
+            }
+          }
+          upcomingPromotionalOffers {
+            promotionalOffers {
+              startDate
+              endDate
+              discountSetting {
+                discountType
+                discountPercentage
+              }
+            }
+          }
+        }
+      }
+      paging {
+        count
+        total
+      }
+    }
+  }
+}`;
+
+interface EpicPage {
+  data: {
+    Catalog: {
+      searchStore: {
+        elements: EpicGame[];
+        paging: {
+          count: number;
+          total: number;
+        };
+      };
+    };
   };
 }
 
-export default async function EpicStore(): Promise<GameOffer[]> {
-  try {
-    const offers = await fetch("https://www.epicgames.com/graphql", {
-      "headers": {
-        "accept": "application/json, text/plain, */*",
-        "accept-language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7",
-        "content-type": "application/json;charset=UTF-8",
-        "sec-fetch-dest": "empty",
-        "sec-fetch-mode": "cors",
-        "sec-fetch-site": "same-origin",
-        "x-requested-with": "XMLHttpRequest",
-      },
-      "referrer":
-        "https://www.epicgames.com/store/pt-BR/browse?sortBy=releaseDate&sortDir=DESC&pageSize=30",
-      "referrerPolicy": "strict-origin-when-cross-origin",
-      "body":
-        '{"query":"query searchStoreQuery($allowCountries: String, $category: String, $count: Int, $country: String!, $keywords: String, $locale: String, $namespace: String, $itemNs: String, $sortBy: String, $sortDir: String, $start: Int, $tag: String, $releaseDate: String, $withPrice: Boolean = false, $withPromotions: Boolean = false, $priceRange: String, $freeGame: Boolean, $onSale: Boolean, $effectiveDate: String) {\\n  Catalog {\\n    searchStore(\\n      allowCountries: $allowCountries\\n      category: $category\\n      count: $count\\n      country: $country\\n      keywords: $keywords\\n      locale: $locale\\n      namespace: $namespace\\n      itemNs: $itemNs\\n      sortBy: $sortBy\\n      sortDir: $sortDir\\n      releaseDate: $releaseDate\\n      start: $start\\n      tag: $tag\\n      priceRange: $priceRange\\n      freeGame: $freeGame\\n      onSale: $onSale\\n      effectiveDate: $effectiveDate\\n    ) {\\n      elements {\\n        title\\n        id\\n        namespace\\n        description\\n        effectiveDate\\n        keyImages {\\n          type\\n          url\\n        }\\n        currentPrice\\n        seller {\\n          id\\n          name\\n        }\\n        productSlug\\n        urlSlug\\n        url\\n        tags {\\n          id\\n        }\\n        items {\\n          id\\n          namespace\\n        }\\n        customAttributes {\\n          key\\n          value\\n        }\\n        categories {\\n          path\\n        }\\n        price(country: $country) @include(if: $withPrice) {\\n          totalPrice {\\n            discountPrice\\n            originalPrice\\n            voucherDiscount\\n            discount\\n            currencyCode\\n            currencyInfo {\\n              decimals\\n            }\\n            fmtPrice(locale: $locale) {\\n              originalPrice\\n              discountPrice\\n              intermediatePrice\\n            }\\n          }\\n          lineOffers {\\n            appliedRules {\\n              id\\n              endDate\\n              discountSetting {\\n                discountType\\n              }\\n            }\\n          }\\n        }\\n        promotions(category: $category) @include(if: $withPromotions) {\\n          promotionalOffers {\\n            promotionalOffers {\\n              startDate\\n              endDate\\n              discountSetting {\\n                discountType\\n                discountPercentage\\n              }\\n            }\\n          }\\n          upcomingPromotionalOffers {\\n            promotionalOffers {\\n              startDate\\n              endDate\\n              discountSetting {\\n                discountType\\n                discountPercentage\\n              }\\n            }\\n          }\\n        }\\n      }\\n      paging {\\n        count\\n        total\\n      }\\n    }\\n  }\\n}\\n","variables":{"category":"games/edition/base|bundles/games|editors|software/edition/base","count":30,"country":"BR","keywords":"","locale":"pt-BR","sortBy":"releaseDate","sortDir":"DESC","allowCountries":"BR","start":0,"tag":"","releaseDate":"[,2021-01-10T00:34:29.117Z]","onSale":true,"effectiveDate":"[,2021-01-10T00:34:29.118Z]","withPrice":true}}',
-      "method": "POST",
-      "mode": "cors",
-      "credentials": "include",
-    })
-      .then(parseResJson<EpicStore>());
+interface EpicGame {
+  title: string;
+  seller: {
+    name: string;
+  };
+  productSlug: string;
+  price: {
+    totalPrice: {
+      discountPrice: number;
+      originalPrice: number;
+      currencyInfo: {
+        decimals: number;
+      };
+    };
+  };
+}
 
-    return offers.data.Catalog.searchStore.elements.map(toOffer);
-  } catch (error) {
-    logger.requestError(import.meta, error);
+export default class EpicStore implements GameOfferProvider {
+  logger = createLogger({ ...import.meta, suffix: undefined });
+
+  private static buildBody(page: number): string {
+    return JSON.stringify(
+      {
+        query: EPIC_GRAPHQL_QUERY,
+        variables: {
+          allowCountries: "BR",
+          country: "BR",
+          locale: "pt-BR",
+
+          start: Math.round(250 * page),
+          count: 250,
+        },
+      },
+      undefined,
+      1,
+    );
   }
 
-  return [];
+  private static parseGame(game: EpicGame): GameOffer {
+    const {
+      originalPrice,
+      discountPrice,
+      currencyInfo: { decimals },
+    } = game.price.totalPrice;
+
+    const scale = 10 ** decimals;
+    const base = originalPrice / scale;
+    const final = discountPrice / scale;
+    const discount = (base - final) / base * 100;
+
+    return {
+      provider: "epic-store",
+      title: game.title,
+      publisher: game.seller.name,
+      price: { base, final, discount },
+      link: `https://www.epicgames.com/store/en-US/product/${game.productSlug}`,
+    };
+  }
+
+  async fetchPages(): Promise<EpicGame[]> {
+    const pages: EpicGame[][] = [];
+
+    try {
+      let current = 0, total = 0;
+
+      do {
+        const data = await fetch(
+          EPIC_API_URL,
+          {
+            method: "POST",
+            headers: {
+              "content-type": "application/json;charset=UTF-8",
+            },
+            body: EpicStore.buildBody(current),
+          },
+        ).then(parseResJson<EpicPage>());
+
+        const { elements: games, paging } = data.data.Catalog.searchStore;
+        pages.push(games);
+
+        total = Math.ceil(paging.total / 250);
+        current += 1;
+        this.logger.info(
+          `found ${games.length} games at page ${current} of ${total}`,
+        );
+      } while (current < total);
+    } catch (error) {
+      this.logger.requestError(error);
+    }
+
+    return pages.flat();
+  }
+
+  async query(): Promise<GameOffer[]> {
+    this.logger.info("query started");
+
+    const games = await this.fetchPages();
+
+    this.logger.info(`query ended: ${games.length} games found`);
+
+    return games.map(EpicStore.parseGame);
+  }
 }
+
+// function toOffer(offer: Element): GameOffer {
+//   const { originalPrice, discountPrice, currencyInfo: { decimals } } =
+//     offer.price.totalPrice;
+
+//   const dec = 10 ** decimals;
+//   const base = originalPrice / dec;
+//   const final = discountPrice / dec;
+//   const discount = (base - final) / base * 100;
+
+//   return {
+//     provider: "EpicStore",
+//     publisher: offer.seller.name,
+//     title: offer.title,
+//     price: { base, final, discount },
+//     link: `https://www.epicgames.com/store/en-US/product/${offer.productSlug}`,
+//   };
+// }

@@ -1,4 +1,5 @@
 import { disableLogger } from "./logging/logger.ts";
+import EpicStore from "./providers/EpicStore.ts";
 import GoG from "./providers/GoG.ts";
 import GameOffer from "./types/GameOffer.d.ts";
 import { GameOfferProvider } from "./types/GameOfferProvider.d.ts";
@@ -9,12 +10,13 @@ export const providers = {
   },
   discounted: {
     "gog": new GoG("discounted"),
+    "epic-store": new EpicStore(),
   },
 };
 
 export type RegisteredProviders =
-  & keyof typeof providers.free
-  & keyof typeof providers.discounted;
+  | keyof typeof providers.free
+  | keyof typeof providers.discounted;
 
 async function queryOffers(
   providers: GameOfferProvider[],
