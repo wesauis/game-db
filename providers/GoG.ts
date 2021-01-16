@@ -1,4 +1,4 @@
-import logger from "../logging/logger.ts";
+import { createLogger } from "../logging/logger.ts";
 import type GameOffer from "../types/GameOffer.d.ts";
 import { parseResJson } from "../utils/parsers.ts";
 import { GameOfferProvider } from "./../types/GameOfferProvider.d.ts";
@@ -25,6 +25,8 @@ interface GoGGame {
 }
 
 export default class GoG implements GameOfferProvider {
+  logger = createLogger({ ...import.meta, suffix: this.PRICING });
+
   constructor(private readonly PRICING: "free" | "discounted") {}
 
   private static parseGame(game: GoGGame): GameOffer {
@@ -56,26 +58,26 @@ export default class GoG implements GameOfferProvider {
         total = page.totalPages;
         games.push(page.products);
 
-        logger.info(
-          import.meta,
-          `pricing: ${this.PRICING}, page ${current} of ${total}, games: ${page.products.length}`,
+        this.logger.info(
+          `found ${page.products.length} games at page ${current} of ${total}`,
         );
+
         current += 1;
-      } while (current < total);
+      } while (current <= total);
     } catch (error) {
-      logger.requestError(import.meta, error);
+      this.logger.requestError(error);
     }
 
     return games;
   }
 
   async query(): Promise<GameOffer[]> {
-    logger.info(import.meta, "query started");
+    this.logger.info("query started");
 
     const games = await this.fetchGames()
       .then((pages) => pages.flat());
 
-    logger.info(import.meta, `${games.length} games found`);
+    this.logger.info(`DONE: ${games.length} games found`);
 
     return games.map(GoG.parseGame);
   }

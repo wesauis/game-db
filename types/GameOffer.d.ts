@@ -5,6 +5,7 @@ export default interface GameOffer {
 
   title: string;
   publisher?: string;
+  developer?: string;
   link: string;
 
   price?: {

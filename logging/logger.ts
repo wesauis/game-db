@@ -6,33 +6,39 @@ export function disableLogger() {
   enabled = false;
 }
 
-function prefix(meta: ImportMeta) {
-  return `[${
-    meta.url.substring(
-      // filename
-      meta.url.lastIndexOf("/") + 1,
-      // remove .{js,ts}
-      meta.url.length - 3,
-    )
-  }]`;
+export type MetaEx = ImportMeta & {
+  suffix?: string;
+};
+
+function labelFrom(meta: MetaEx) {
+  const prefix = meta.url.substring(
+    // filename
+    meta.url.lastIndexOf("/") + 1,
+    // remove .{js,ts}
+    meta.url.length - 3,
+  );
+
+  const suffix = meta.suffix ? `/${meta.suffix}` : "";
+
+  return `[${prefix}${suffix}]`;
 }
 
-function info(meta: ImportMeta, arg1: unknown, ...args: unknown[]) {
-  if (enabled) console.info(cyan(prefix(meta)), arg1, ...args);
+function info(prefix: string, arg1: unknown, ...args: unknown[]) {
+  if (enabled) console.info(cyan(prefix), arg1, ...args);
 }
 
-function warn(meta: ImportMeta, arg1: unknown, ...args: unknown[]) {
-  if (enabled) console.warn(yellow(prefix(meta)), arg1, ...args);
+function warn(prefix: string, arg1: unknown, ...args: unknown[]) {
+  if (enabled) console.warn(yellow(prefix), arg1, ...args);
 }
 
-function error(meta: ImportMeta, arg1: unknown, ...args: unknown[]) {
-  if (enabled) console.error(red(prefix(meta)), arg1, ...args);
+function error(prefix: string, arg1: unknown, ...args: unknown[]) {
+  if (enabled) console.error(red(prefix), arg1, ...args);
 }
 
-function requestError(meta: ImportMeta, error: Response | Error) {
+function requestError(prefix: string, error: Response | Error) {
   if (!enabled) return;
 
-  const prefix_ = red(prefix(meta));
+  const prefix_ = red(prefix);
 
   if ("status" in error) {
     console.error(
@@ -45,9 +51,19 @@ function requestError(meta: ImportMeta, error: Response | Error) {
   }
 }
 
-export default {
-  info,
-  warn,
-  error,
-  requestError,
-};
+export const createLogger = (metaEx: MetaEx) => ({
+  info(arg1: unknown, ...args: unknown[]) {
+    info(labelFrom(metaEx), arg1, ...args);
+  },
+  warn(arg1: unknown, ...args: unknown[]) {
+    warn(labelFrom(metaEx), arg1, ...args);
+  },
+  error(arg1: unknown, ...args: unknown[]) {
+    error(labelFrom(metaEx), arg1, ...args);
+  },
+  requestError(error: Response | Error) {
+    requestError(labelFrom(metaEx), error);
+  },
+});
+
+export default { info, warn, error, requestError };
