@@ -4,16 +4,26 @@
 
 _find free or really good game offers_
 
-# Installation
+# API
 
-## Windows (Powershell)
+```typescript
+import {
+  providers,
+  queryOffers,
+} from "https://github.com/wesauis/game-db/raw/0.1.0/mod.ts";
 
-```ps1
-deno install mod.ts
+console.log(await queryOffers(Object.values(providers.free)));
 ```
 
-## Unix (sh)
+# CLI
+
+## Intalation
 
 ```sh
-deno install mod.ts
+deno install --allow-net --name game-db https://github.com/wesauis/game-db/raw/0.1.0/mod.ts
+```
+
+# Usage
+```sh
+game-db --help
 ```
