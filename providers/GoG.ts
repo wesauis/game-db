@@ -44,7 +44,7 @@ export default class GoG implements GameOfferProvider {
     };
   }
 
-  async fetchGames(): Promise<GoGGame[]> {
+  private async fetchGames(): Promise<GoGGame[]> {
     const games: GoGGame[][] = [];
 
     try {

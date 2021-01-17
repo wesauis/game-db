@@ -161,7 +161,7 @@ export default class EpicStore implements GameOfferProvider {
     };
   }
 
-  async fetchPages(): Promise<EpicGame[]> {
+  private async fetchPages(): Promise<EpicGame[]> {
     const pages: EpicGame[][] = [];
 
     try {

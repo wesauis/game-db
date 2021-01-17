@@ -1,6 +1,6 @@
 # Game DB
 
->  v0.0.0
+>  v0.1.0
 
 _find free or really good game offers_
 

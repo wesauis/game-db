@@ -1,43 +1,91 @@
 import type { Element } from "../deps.ts";
-import { DOMParser } from "../deps.ts";
-import logger from "../logging/logger.ts";
+import { createLogger } from "../logging/logger.ts";
 import type GameOffer from "../types/GameOffer.d.ts";
-import { parseElements, parseNum, parseResText } from "../utils/parsers.ts";
+import type { GameOfferProvider } from "../types/GameOfferProvider.d.ts";
+import {
+  parseElements,
+  parseHTML,
+  parseNum,
+  parseResJson,
+} from "../utils/parsers.ts";
 
-function toOffer(el: Element): GameOffer {
-  const $title = el.querySelector(".title");
-  const $discount = el.querySelector(".search_discount span");
+const REQUEST_LIMIT = 8;
 
-  const [, base_, final_] = el
-    .querySelector(".search_price")!
-    .textContent.split("R$");
+const STEAM_API_URL =
+  "https://store.steampowered.com/search/results/?query&sort_by=Reviews_DESC&ignore_preferences=1&count=100&dynamic_data=&force_infinite=1&category1=998&specials=1&infinite=1";
 
-  return {
-    provider: "Steam",
-    title: $title!.textContent,
-    price: {
-      base: parseNum(base_),
-      final: parseNum(final_),
-      discount: parseNum($discount!.textContent),
-    },
-    link: el.attributes["href"],
-  };
+interface SteamRows {
+  results_html: string;
+  start: number;
+  total_count: number;
 }
 
-export default async function Steam(): Promise<GameOffer[]> {
-  try {
-    const html = await fetch(
-      "https://store.steampowered.com/search/?sort_by=Reviews_DESC&category1=998&specials=1",
-    ).then(parseResText);
+export default class Steam implements GameOfferProvider {
+  logger = createLogger({ ...import.meta });
 
-    const $promotions = new DOMParser()
-      .parseFromString(html, "text/html")!
-      .querySelectorAll(".search_result_row");
+  private static parseGame(game: Element): GameOffer {
+    const $title = game.querySelector(".title")!;
+    const $discount = game.querySelector(".search_discount span")!;
 
-    return parseElements($promotions).map(toOffer);
-  } catch (error) {
-    logger.requestError(import.meta, error);
+    const [, sbase, sfinal] = game
+      .querySelector(".search_price")!
+      .textContent.split("R$");
+
+    return {
+      provider: "steam",
+      title: $title.textContent,
+      price: {
+        base: parseNum(sbase),
+        final: parseNum(sfinal),
+        discount: parseNum($discount.textContent),
+      },
+      link: game.attributes["href"],
+    };
   }
 
-  return [];
+  private async fetchRowsHTML(): Promise<string> {
+    const rows: SteamRows[] = [];
+
+    try {
+      let current = 0, total = 0;
+
+      do {
+        const data = await fetch(
+          `${STEAM_API_URL}&start=${current * 100}`,
+        ).then(parseResJson<SteamRows>());
+
+        rows.push(data);
+
+        total = Math.ceil(data.total_count / 100);
+        current += 1;
+        this.logger.info(`fethed games at page ${current} of ${total}`);
+      } while (current < total && current < REQUEST_LIMIT);
+
+      if (current < total) {
+        // the limit is used to reduce the number of request to the steam server
+        // I don't want to abuse
+        // and btw, after the 8th page the games are not so great anymore :}
+        this.logger.info(`reached page ${REQUEST_LIMIT}, stopping`);
+      }
+    } catch (error) {
+      this.logger.requestError(error);
+    }
+
+    return `<body>${
+      rows
+        .map((row) => row.results_html)
+        .join(" ")
+    }</body>`;
+  }
+
+  async query(): Promise<GameOffer[]> {
+    this.logger.info("query started");
+
+    const html = parseHTML(await this.fetchRowsHTML())!;
+    const elements = parseElements(html.querySelectorAll(".search_result_row"));
+
+    this.logger.info(`query ended: ${elements.length} games found`);
+
+    return elements.map(Steam.parseGame);
+  }
 }

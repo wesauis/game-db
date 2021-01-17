@@ -1,4 +1,5 @@
-import type { Element, NodeList } from "../deps.ts";
+import type { Element, HTMLDocument, NodeList } from "../deps.ts";
+import { DOMParser } from "../deps.ts";
 
 export function parseResJson<T>() {
   return (res: Response): Promise<T> => {
@@ -38,6 +39,11 @@ export function parseNum(price: string | null, comma = ",") {
   if (isNaN(parsed)) throw new Error(`number format exception: ${normalized}`);
 
   return parsed;
+}
+
+const domParser = new DOMParser();
+export function parseHTML(html: string): HTMLDocument | null {
+  return domParser.parseFromString(html, "text/html");
 }
 
 export function parseElements(nodeList: NodeList): Element[] {
