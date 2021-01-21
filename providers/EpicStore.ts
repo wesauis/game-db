@@ -1,4 +1,4 @@
-import { createLogger } from "../logging/logger.ts";
+import { Logger } from "../logging/logger.ts";
 import GameOffer from "../types/GameOffer.d.ts";
 import { GameOfferProvider } from "../types/GameOfferProvider.d.ts";
 import { parseResJson } from "../utils/parsers.ts";
@@ -109,10 +109,11 @@ interface EpicGame {
   };
 }
 
-export default class EpicStore implements GameOfferProvider {
-  logger = createLogger({ ...import.meta, suffix: this.PRICING });
+class EpicStore implements GameOfferProvider {
+  name = "epic-store";
+  logger = new Logger(`${this.name}/${this.category}`);
 
-  constructor(private readonly PRICING: "free" | "discounted") {}
+  constructor(readonly category: "free" | "discounted") {}
 
   private buildBody(page: number): string {
     return JSON.stringify(
@@ -126,8 +127,8 @@ export default class EpicStore implements GameOfferProvider {
           start: Math.round(250 * page),
           count: 250,
 
-          onSale: this.PRICING === "discounted" ? true : null,
-          freeGame: this.PRICING === "free",
+          onSale: this.category === "discounted" ? true : null,
+          freeGame: this.category === "free",
         },
       },
       undefined,
@@ -137,7 +138,7 @@ export default class EpicStore implements GameOfferProvider {
 
   private parseGame(game: EpicGame): GameOffer {
     let price;
-    if (this.PRICING === "discounted") {
+    if (this.category === "discounted") {
       const {
         originalPrice,
         discountPrice,

@@ -1,4 +1,4 @@
-import { createLogger } from "../logging/logger.ts";
+import { Logger } from "../logging/logger.ts";
 import type GameOffer from "../types/GameOffer.d.ts";
 import { parseResJson } from "../utils/parsers.ts";
 import { GameOfferProvider } from "./../types/GameOfferProvider.d.ts";
@@ -24,10 +24,11 @@ interface GoGGame {
   url: string;
 }
 
-export default class GoG implements GameOfferProvider {
-  logger = createLogger({ ...import.meta, suffix: this.PRICING });
+class GoG implements GameOfferProvider {
+  name = "gog";
+  logger = new Logger(`${this.name}/${this.category}`);
 
-  constructor(private readonly PRICING: "free" | "discounted") {}
+  constructor(readonly category: "free" | "discounted") {}
 
   private static parseGame(game: GoGGame): GameOffer {
     return {
@@ -52,7 +53,7 @@ export default class GoG implements GameOfferProvider {
 
       do {
         const page = await fetch(
-          `${GOG_API_URL}&price=${this.PRICING}&page=${current}`,
+          `${GOG_API_URL}&price=${this.category}&page=${current}`,
         ).then(parseResJson<GoGPage>());
 
         total = page.totalPages;

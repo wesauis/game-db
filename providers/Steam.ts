@@ -1,5 +1,5 @@
 import type { Element } from "../deps.ts";
-import { createLogger } from "../logging/logger.ts";
+import { Logger } from "../logging/logger.ts";
 import type GameOffer from "../types/GameOffer.d.ts";
 import type { GameOfferProvider } from "../types/GameOfferProvider.d.ts";
 import {
@@ -20,8 +20,12 @@ interface SteamRows {
   total_count: number;
 }
 
-export default class Steam implements GameOfferProvider {
-  logger = createLogger({ ...import.meta });
+function f(d: GameOfferProvider) {}
+
+class Steam implements GameOfferProvider {
+  name = "steam";
+  category = "discounted";
+  logger = new Logger(`${this.name}/${this.category}`);
 
   private static parseGame(game: Element): GameOffer {
     const $title = game.querySelector(".title")!;
