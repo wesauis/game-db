@@ -1,33 +1,26 @@
 import { disableLogger } from "./logging/logger.ts";
-import EpicStore from "./providers/EpicStore.ts";
-import GoG from "./providers/GoG.ts";
-import Steam from "./providers/Steam.ts";
+import providers, { loadProviders } from "./provider-registry.ts";
 import GameOffer from "./types/GameOffer.d.ts";
-import { GameOfferProvider } from "./types/GameOfferProvider.d.ts";
 
-export const providers = {
-  free: {
-    "gog": new GoG("free"),
-    "epic-store": new EpicStore("free"),
-  },
-  discounted: {
-    "gog": new GoG("discounted"),
-    "epic-store": new EpicStore("discounted"),
-    "steam": new Steam(),
-  },
-};
-
-export type RegisteredProviders =
-  | keyof typeof providers.free
-  | keyof typeof providers.discounted;
-
-export async function queryOffers(
-  providers: GameOfferProvider[],
+async function queryOffers(
+  categories?: string[],
+  names?: string[],
 ): Promise<GameOffer[]> {
-  return await Promise
-    .all(providers.map((provider) => provider.query()))
-    // join the results
-    .then((offers) => offers.flat());
+  let queries = Array.from(providers);
+
+  if (categories) {
+    queries = queries
+      .filter((query) => categories.includes(query.category));
+  }
+
+  if (names) {
+    queries = queries
+      .filter((query) => names.includes(query.name));
+  }
+
+  return (await Promise
+    .all(queries.map((provider) => provider.query())))
+    .flat();
 }
 
 if (import.meta.main) {
@@ -53,19 +46,17 @@ Options:
   if (Deno.args.includes("--no-logging")) disableLogger();
   if (Deno.args.includes("--raw")) spaces = undefined;
 
-  const providers_: GameOfferProvider[] = [];
-  if (Deno.args.includes("--free")) {
-    providers_.push(...Object.values(providers.free));
-  }
-  if (Deno.args.includes("--discounted")) {
-    providers_.push(...Object.values(providers.discounted));
-  }
-  if (providers_.length === 0) {
-    providers_.push(
-      ...Object.values(providers.free),
-      ...Object.values(providers.discounted),
-    );
-  }
+  await loadProviders();
 
-  console.log(JSON.stringify(await queryOffers(providers_), undefined, spaces));
+  /**
+   * TODO: 
+   * - better args for raw and logging
+   * - select providers to query by name and/or category
+   * - options raw and raw-pretty
+   * - default output shout be just updates
+   * - docs
+   */
+
+  const games = await queryOffers(["free"], ["epic-store"]);
+  console.log(JSON.stringify(games, undefined, spaces));
 }

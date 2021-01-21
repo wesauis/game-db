@@ -1,7 +1,8 @@
 import { Logger } from "../logging/logger.ts";
+import type { GameOfferProvider } from "../provider-registry.ts";
+import { register } from "../provider-registry.ts";
 import type GameOffer from "../types/GameOffer.d.ts";
 import { parseResJson } from "../utils/parsers.ts";
-import { GameOfferProvider } from "./../types/GameOfferProvider.d.ts";
 
 const GOG_API_URL =
   "https://www.gog.com/games/ajax/filtered?mediaType=game&sort=rating";
@@ -82,3 +83,6 @@ class GoG implements GameOfferProvider {
     return games.map(GoG.parseGame);
   }
 }
+
+register(new GoG("free"));
+register(new GoG("discounted"));

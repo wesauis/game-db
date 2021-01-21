@@ -1,7 +1,5 @@
-import { RegisteredProviders } from "../mod.ts";
-
 export default interface GameOffer {
-  provider: RegisteredProviders;
+  provider: string;
 
   title: string;
   publisher?: string;

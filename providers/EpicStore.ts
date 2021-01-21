@@ -1,6 +1,7 @@
 import { Logger } from "../logging/logger.ts";
+import type { GameOfferProvider } from "../provider-registry.ts";
+import { register } from "../provider-registry.ts";
 import GameOffer from "../types/GameOffer.d.ts";
-import { GameOfferProvider } from "../types/GameOfferProvider.d.ts";
 import { parseResJson } from "../utils/parsers.ts";
 
 const EPIC_API_URL = "https://www.epicgames.com/graphql";
@@ -207,20 +208,5 @@ class EpicStore implements GameOfferProvider {
   }
 }
 
-// function toOffer(offer: Element): GameOffer {
-//   const { originalPrice, discountPrice, currencyInfo: { decimals } } =
-//     offer.price.totalPrice;
-
-//   const dec = 10 ** decimals;
-//   const base = originalPrice / dec;
-//   const final = discountPrice / dec;
-//   const discount = (base - final) / base * 100;
-
-//   return {
-//     provider: "EpicStore",
-//     publisher: offer.seller.name,
-//     title: offer.title,
-//     price: { base, final, discount },
-//     link: `https://www.epicgames.com/store/en-US/product/${offer.productSlug}`,
-//   };
-// }
+register(new EpicStore("free"));
+register(new EpicStore("discounted"));

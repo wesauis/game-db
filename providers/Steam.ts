@@ -1,7 +1,8 @@
 import type { Element } from "../deps.ts";
 import { Logger } from "../logging/logger.ts";
+import type { GameOfferProvider } from "../provider-registry.ts";
+import { register } from "../provider-registry.ts";
 import type GameOffer from "../types/GameOffer.d.ts";
-import type { GameOfferProvider } from "../types/GameOfferProvider.d.ts";
 import {
   parseElements,
   parseHTML,
@@ -93,3 +94,5 @@ class Steam implements GameOfferProvider {
     return elements.map(Steam.parseGame);
   }
 }
+
+register(new Steam());
