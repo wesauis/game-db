@@ -1,4 +1,3 @@
-import { disableLogger } from "./logging/logger.ts";
 import providers from "./provider-registry.ts";
 import GameOffer from "./types/GameOffer.d.ts";
 
@@ -33,17 +32,17 @@ if (import.meta.main) {
 query games from all providers and output the json to the stdout
 
 Options: 
-    --no-logging    disable logger
+    --help          show this help message
     --raw           dont prettify json
-    --free          use free games providers
-    --discounted    use free games providers
-    --help          show this help message`,
+    
+Env:
+    NO_COLOR        disable colors
+    NO_LOGGER       disable logger`,
     );
 
     Deno.exit(0);
   }
 
-  if (Deno.args.includes("--no-logging")) disableLogger();
   if (Deno.args.includes("--raw")) spaces = undefined;
 
   /**
