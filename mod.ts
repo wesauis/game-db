@@ -1,5 +1,5 @@
 import { disableLogger } from "./logging/logger.ts";
-import providers, { loadProviders } from "./provider-registry.ts";
+import providers from "./provider-registry.ts";
 import GameOffer from "./types/GameOffer.d.ts";
 
 async function queryOffers(
@@ -45,8 +45,6 @@ Options:
 
   if (Deno.args.includes("--no-logging")) disableLogger();
   if (Deno.args.includes("--raw")) spaces = undefined;
-
-  await loadProviders();
 
   /**
    * TODO: 

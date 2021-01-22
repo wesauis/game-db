@@ -1,6 +1,4 @@
-import { Logger } from "../logging/logger.ts";
-import type { GameOfferProvider } from "../provider-registry.ts";
-import { register } from "../provider-registry.ts";
+import { GameOfferProvider } from "../GameOfferProvider.ts";
 import GameOffer from "../types/GameOffer.d.ts";
 import { parseResJson } from "../utils/parsers.ts";
 
@@ -110,11 +108,10 @@ interface EpicGame {
   };
 }
 
-class EpicStore implements GameOfferProvider {
-  name = "epic-store";
-  logger = new Logger(`${this.name}/${this.category}`);
-
-  constructor(readonly category: "free" | "discounted") {}
+export default class EpicStore extends GameOfferProvider {
+  constructor(category: "free" | "discounted") {
+    super("epic-store", category);
+  }
 
   private buildBody(page: number): string {
     return JSON.stringify(
@@ -207,6 +204,3 @@ class EpicStore implements GameOfferProvider {
     return games.map((game) => this.parseGame(game));
   }
 }
-
-register(new EpicStore("free"));
-register(new EpicStore("discounted"));

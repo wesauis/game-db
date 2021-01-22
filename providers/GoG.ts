@@ -1,6 +1,4 @@
-import { Logger } from "../logging/logger.ts";
-import type { GameOfferProvider } from "../provider-registry.ts";
-import { register } from "../provider-registry.ts";
+import { GameOfferProvider } from "../GameOfferProvider.ts";
 import type GameOffer from "../types/GameOffer.d.ts";
 import { parseResJson } from "../utils/parsers.ts";
 
@@ -25,11 +23,10 @@ interface GoGGame {
   url: string;
 }
 
-class GoG implements GameOfferProvider {
-  name = "gog";
-  logger = new Logger(`${this.name}/${this.category}`);
-
-  constructor(readonly category: "free" | "discounted") {}
+export default class GoG extends GameOfferProvider {
+  constructor(category: "free" | "discounted") {
+    super("gog", category);
+  }
 
   private static parseGame(game: GoGGame): GameOffer {
     return {
@@ -83,6 +80,3 @@ class GoG implements GameOfferProvider {
     return games.map(GoG.parseGame);
   }
 }
-
-register(new GoG("free"));
-register(new GoG("discounted"));

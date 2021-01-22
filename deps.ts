@@ -1,3 +1,4 @@
+export { parse as parseArgs } from "https://deno.land/std@0.84.0/flags/mod.ts";
 export { cyan, red, yellow } from "https://deno.land/std@0.84.0/fmt/colors.ts";
 export { getLogger, Logger } from "https://deno.land/std@0.84.0/log/mod.ts";
 export { DOMParser } from "https://deno.land/x/deno_dom@v0.1.3-alpha2/deno-dom-wasm.ts";
