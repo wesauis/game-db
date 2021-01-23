@@ -1,3 +1,4 @@
+import { parseArgs } from "./deps.ts";
 import providers from "./provider-registry.ts";
 import GameOffer from "./types/GameOffer.d.ts";
 
@@ -23,9 +24,11 @@ async function queryOffers(
 }
 
 if (import.meta.main) {
-  let spaces: 2 | undefined = 2;
+  const args = parseArgs(Deno.args, {
+    boolean: ["help", "json"],
+  });
 
-  if (Deno.args.includes("--help")) {
+  if (args["help"]) {
     console.log(
       `Usage: game-db [OPTIONS]
 
@@ -43,7 +46,13 @@ Env:
     Deno.exit(0);
   }
 
-  if (Deno.args.includes("--raw")) spaces = undefined;
+  const games = await queryOffers(["free"], ["epic-store"]);
+
+  if (args["json"]) {
+    console.log(JSON.stringify(games));
+  } else {
+    throw new Error("unimplemented yet...");
+  }
 
   /**
    * TODO: 
@@ -53,7 +62,4 @@ Env:
    * - default output shout be just updates
    * - docs
    */
-
-  const games = await queryOffers(["free"], ["epic-store"]);
-  console.log(JSON.stringify(games, undefined, spaces));
 }
