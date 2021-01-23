@@ -32,16 +32,21 @@ export default class Steam extends GameOfferProvider {
       .querySelector(".search_price")!
       .textContent.split("R$");
 
-    return {
-      provider: "steam",
-      title: $title.textContent,
-      price: {
-        base: parseNum(sbase),
-        final: parseNum(sfinal),
-        discount: parseNum($discount.textContent),
-      },
-      link: game.attributes["href"],
-    };
+    try {
+      return {
+        provider: "steam",
+        title: $title.textContent,
+        price: {
+          base: parseNum(sbase || "0"),
+          final: parseNum(sfinal || "0"),
+          discount: parseNum($discount?.textContent || "0"),
+        },
+        link: game.attributes["href"],
+      };
+    } catch (err) {
+      console.error(`<html>${game.innerHTML}</html>`);
+      throw err;
+    }
   }
 
   private async fetchRowsHTML(): Promise<string> {

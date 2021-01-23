@@ -1,9 +1,9 @@
-import { cyan, red, yellow } from "../deps.ts";
+import { cyan, red, yellow } from "https://deno.land/std@0.84.0/fmt/colors.ts";
 import { STATUS_CODES } from "./status.ts";
 
-const enabled = Deno.env.get("NO_LOGGER") == null;
-
 export class Logger {
+  static ENABLED = true;
+
   private readonly LABEL_INFO;
   private readonly LABEL_WARN;
   private readonly LABEL_ERROR;
@@ -17,25 +17,25 @@ export class Logger {
   }
 
   info(arg1: unknown, ...args: unknown[]) {
-    if (enabled) {
+    if (Logger.ENABLED) {
       console.info(this.LABEL_INFO, arg1, ...args);
     }
   }
 
   warn(arg1: unknown, ...args: unknown[]) {
-    if (enabled) {
+    if (Logger.ENABLED) {
       console.warn(this.LABEL_WARN, arg1, ...args);
     }
   }
 
   error(arg1: unknown, ...args: unknown[]) {
-    if (enabled) {
+    if (Logger.ENABLED) {
       console.error(this.LABEL_ERROR, arg1, ...args);
     }
   }
 
   requestError(error: Response | Error) {
-    if (!enabled) return;
+    if (!Logger.ENABLED) return;
 
     if ("status" in error) {
       console.error(

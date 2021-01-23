@@ -1,4 +1,4 @@
-import { Logger } from "./logging/logger.ts";
+import { Logger } from "../log/logger.ts";
 import GameOffer from "./types/GameOffer.d.ts";
 
 export abstract class GameOfferProvider {
