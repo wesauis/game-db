@@ -1,16 +1,44 @@
 import type { Element, HTMLDocument, NodeList } from "../deps.ts";
 import { DOMParser } from "../deps.ts";
 
-export function parseResJson<T>() {
-  return (res: Response): Promise<T> => {
-    if (res.ok) {
-      return res.json() as Promise<T>;
-    } else {
-      throw res;
-    }
-  };
+/**
+ * @returns if `response.ok`, the parsed json
+ * @throws if `!response.ok`, the response
+ * @example
+ *   try {
+ *     const json = fetch('someapi.com')
+ *       .then(parseResJson) as Type
+ *   } catch(error) {
+ *     if (error instanceOf Error) {
+ *       // network error
+ *     } else {
+ *       // request error
+ *     } 
+ *   }
+ */
+export function parseResJson(res: Response): Promise<unknown> {
+  if (res.ok) {
+    return res.json();
+  } else {
+    throw res;
+  }
 }
 
+/**
+ * @returns if `response.ok`, the response text
+ * @throws if `!response.ok`, the response
+ * @example
+ *   try {
+ *     const text = fetch('example.com')
+ *       .then(parseResText) as Type
+ *   } catch(error) {
+ *     if (error instanceOf Error) {
+ *       // network error
+ *     } else {
+ *       // request error
+ *     } 
+ *   }
+ */
 export function parseResText(res: Response): Promise<string> {
   if (res.ok) {
     return res.text();
@@ -19,9 +47,20 @@ export function parseResText(res: Response): Promise<string> {
   }
 }
 
-export function parseNum(price: string | null, comma = ",") {
-  // remove non numbers or commas
-  let normalized = price?.replaceAll(new RegExp(`[^0-9${comma[0]}]+`, "g"), "");
+/**
+ * converts a string into a number
+ * ignores all non numbers and comma
+ * 
+ * @param str 
+ * @returns number
+ * @throws if result is NaN
+ * 
+ * @example
+ *   parseNum('USD 3.000,6') => 3000.6
+ */
+export function parseNum(str: string | null) {
+  // remove non numbers and commas
+  let normalized = str?.replaceAll(/[^0-9,]+/g, "");
 
   // replace last comma with a dot
   const index = normalized?.lastIndexOf(",");
@@ -42,10 +81,24 @@ export function parseNum(price: string | null, comma = ",") {
 }
 
 const domParser = new DOMParser();
-export function parseHTML(html: string): HTMLDocument | null {
-  return domParser.parseFromString(html, "text/html");
+/**
+ * converts a string into a HTMLDocument
+ * 
+ * @param html 
+ */
+export function parseHTML(text: string): HTMLDocument {
+  const html = domParser.parseFromString(text, "text/html");
+
+  if (html) return html;
+
+  throw new Error("invalid html");
 }
 
+/**
+ * converts a nodelist into a array
+ * 
+ * @param nodeList 
+ */
 export function parseElements(nodeList: NodeList): Element[] {
   return Array.from(nodeList as Iterable<Element>);
 }

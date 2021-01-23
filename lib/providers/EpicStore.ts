@@ -176,7 +176,7 @@ export default class EpicStore extends GameOfferProvider {
             },
             body: this.buildBody(current),
           },
-        ).then(parseResJson<EpicPage>());
+        ).then(parseResJson) as EpicPage;
 
         const { elements: games, paging } = data.data.Catalog.searchStore;
         pages.push(games);

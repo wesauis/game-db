@@ -52,7 +52,7 @@ export default class GoG extends GameOfferProvider {
       do {
         const page = await fetch(
           `${GOG_API_URL}&price=${this.category}&page=${current}`,
-        ).then(parseResJson<GoGPage>());
+        ).then(parseResJson) as GoGPage;
 
         total = page.totalPages;
         games.push(page.products);

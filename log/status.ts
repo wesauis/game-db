@@ -1,3 +1,10 @@
+/**
+ * All HTTP status codes and their text equivalents. 
+ * 
+ * @example 
+ *  STATUS_CODES[418] => 'Im a Teapot'
+ *  STATUS_CODES[unknown-status-code] => unknown
+ */
 export const STATUS_CODES: { [id: number]: string } = {
   202: "Accepted",
   502: "Bad Gateway",
@@ -11,7 +18,7 @@ export const STATUS_CODES: { [id: number]: string } = {
   504: "Gateway Timeout",
   410: "Gone",
   505: "Http Version Not Supported",
-  418: "Im A Teapot",
+  418: "Im a Teapot",
   419: "Insufficient Space On Resource",
   507: "Insufficient Storage",
   500: "Internal Server Error",

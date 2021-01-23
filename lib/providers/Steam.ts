@@ -5,7 +5,7 @@ import {
   parseElements,
   parseHTML,
   parseNum,
-  parseResJson,
+  parseResJson
 } from "../utils/parsers.ts";
 
 const REQUEST_LIMIT = 8;
@@ -58,7 +58,7 @@ export default class Steam extends GameOfferProvider {
       do {
         const data = await fetch(
           `${STEAM_API_URL}&start=${current * 100}`,
-        ).then(parseResJson<SteamRows>());
+        ).then(parseResJson) as SteamRows;
 
         rows.push(data);
 
@@ -87,7 +87,7 @@ export default class Steam extends GameOfferProvider {
   async query(): Promise<GameOffer[]> {
     this.logger.info("query started");
 
-    const html = parseHTML(await this.fetchRowsHTML())!;
+    const html = parseHTML(await this.fetchRowsHTML());
     const elements = parseElements(html.querySelectorAll(".search_result_row"));
 
     this.logger.info(`query ended: ${elements.length} games found`);

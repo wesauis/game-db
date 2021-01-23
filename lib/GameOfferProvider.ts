@@ -7,5 +7,8 @@ export abstract class GameOfferProvider {
     this.logger = new Logger(`${this.name}/${this.category}`);
   }
 
+  /**
+   * search and returns all offers
+   */
   abstract query(): Promise<GameOffer[]>;
 }
