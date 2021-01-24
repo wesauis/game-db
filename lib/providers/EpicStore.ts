@@ -126,7 +126,7 @@ export default class EpicStore extends GameOfferProvider {
           count: 250,
 
           onSale: this.category === "discounted" ? true : null,
-          freeGame: this.category === "free",
+          freeGame: this.category === "free" ? true : null,
         },
       },
       undefined,
