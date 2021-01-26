@@ -2,8 +2,10 @@ if (!import.meta.main) throw new Error("cli only");
 
 import { Args } from "https://deno.land/std@0.84.0/flags/mod.ts";
 import logger, { Logger } from "../log/logger.ts";
+import { colorize } from "./colorize.ts";
 import { colors, gamedb, parseArgs } from "./deps.ts";
-import Table from "./Table.ts";
+import HTMLTable from "./table/html.ts";
+import TerminalTable from "./table/termainal.ts";
 
 function showHelpAndExit() {
   console.log(
@@ -32,7 +34,7 @@ Env:
 }
 
 const args = parseArgs(Deno.args, {
-  boolean: ["help", "json", "debug"],
+  boolean: ["help", "json", "debug", "b64-html"],
   string: ["categories", "providers"],
   unknown(arg) {
     logger.warn("unknown argument", arg, "\n");
@@ -52,51 +54,61 @@ if (args.help) showHelpAndExit();
 const categories = args.categories?.split(",");
 const providers = args.providers?.split(",");
 
-const games = await gamedb.queryOffers(categories, providers);
+const games = (await gamedb.queryOffers(categories, providers))
+  .filter((o) => o.price?.discount !== 0)
+  .sort((o0, o1) => (o1.price?.discount || 100) - (o0.price?.discount || 100));
 
 if (args.json) {
   console.log(JSON.stringify(games));
-  Deno.exit(0);
-}
+} else if (args["b64-html"]) {
+  const table = new HTMLTable({
+    "Title": undefined,
+    "Price": { align: "right" },
+  });
 
-/** 
- * Given a value and a discount percentage, colorizes and formats the number.
- * 
- * @param value 
- * @param percentage 
- * @returns the formatted number
- */
-function colorize(value = 0, percentage = 100): string {
-  if (percentage >= 100) {
-    return colors.rgb24("free", 0x00ff00);
-  }
+  games.forEach((offer) => {
+    const title =
+      `<a target="_blank" rel="noopener noreferrer" href="${offer.link}" style="color: black;text-decoration: none; mouse: pointer;">${offer.title}</a>`;
+    const { discount = 100, final = 0 } = offer.price || {};
 
-  // scalles the value from 0-100 to 0-255
-  const scalled = Math.floor(Math.max(percentage * 2.55, 0));
+    let value: string;
+    if (offer.price?.discount === 100) {
+      value = "free".fontcolor("#00ff00");
+    } else {
+      const [r, g, b] = colorize(final, discount);
+      value = `${final.toFixed(2)} ${
+        `-${discount}%`.fontcolor(`rgb(${r},${g},${b})`)
+      }`;
+    }
 
-  // gets a color in the range from red to green
-  const r = 256 - scalled;
-  const g = scalled;
-  const b = 0;
+    table.add([title, value]);
+  });
 
-  // xx.xx (xx%)
-  return `${value.toFixed(2)} ${colors.rgb24(`-${percentage}%`, { r, g, b })}`;
-}
+  table.render();
+} else {
+  const table = new TerminalTable({
+    "Title": undefined,
+    "Price": { align: "right" },
+    "Link": { align: "none", normalize: false },
+  });
 
-const table = new Table({
-  "Title": undefined,
-  "Price": undefined,
-  "Link": { align: "none", normalize: false },
-});
-
-games
-  .filter((o) => o.price?.discount !== 0)
-  .sort((o0, o1) => (o1.price?.discount || 100) - (o0.price?.discount || 100))
-  .forEach((offer) => {
+  games.forEach((offer) => {
     const title = offer.title;
-    const value = colorize(offer.price?.final, offer.price?.discount);
+
+    const { discount = 100, final = 0 } = offer.price || {};
+
+    let value: string;
+    if (offer.price?.discount === 100) {
+      value = colors.rgb24("free", 0x00ff00);
+    } else {
+      const [r, g, b] = colorize(final, discount);
+      value = `${final.toFixed(2)} ${
+        colors.rgb24(`-${discount}%`, { r, g, b })
+      }`;
+    }
 
     table.add([title, value, offer.link]);
   });
 
-table.render();
+  table.render();
+}
