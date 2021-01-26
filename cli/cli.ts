@@ -16,7 +16,8 @@ query games from all providers and output the json to the stdout
 Options: 
   --help          show this help message
   --debug         enables logger
-  --json          json mode: prints raw json to stdout
+  --json          prints raw json to stdout
+  --html          prints the html to the terminal (windows example: \`game-db --html > .html && start .html\`)
   --categories    categories to use separated by comma
                   avaliable categories: ${
       [...gamedb.listCategories()].join(", ")
@@ -34,7 +35,7 @@ Env:
 }
 
 const args = parseArgs(Deno.args, {
-  boolean: ["help", "json", "debug", "b64-html"],
+  boolean: ["help", "json", "debug", "html"],
   string: ["categories", "providers"],
   unknown(arg) {
     logger.warn("unknown argument", arg, "\n");
@@ -55,12 +56,14 @@ const categories = args.categories?.split(",");
 const providers = args.providers?.split(",");
 
 const games = (await gamedb.queryOffers(categories, providers))
+  // remove offers with discount === 0
   .filter((o) => o.price?.discount !== 0)
+  // sorts by descending discount
   .sort((o0, o1) => (o1.price?.discount || 100) - (o0.price?.discount || 100));
 
 if (args.json) {
   console.log(JSON.stringify(games));
-} else if (args["b64-html"]) {
+} else if (args.html) {
   const table = new HTMLTable({
     "Title": undefined,
     "Price": { align: "right" },
@@ -68,7 +71,7 @@ if (args.json) {
 
   games.forEach((offer) => {
     const title =
-      `<a target="_blank" rel="noopener noreferrer" href="${offer.link}" style="color: black;text-decoration: none; mouse: pointer;">${offer.title}</a>`;
+      `<a target="_blank" rel="noopener noreferrer" href="${offer.link}">${offer.title}</a>`;
     const { discount = 100, final = 0 } = offer.price || {};
 
     let value: string;

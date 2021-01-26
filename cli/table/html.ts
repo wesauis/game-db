@@ -30,6 +30,6 @@ export default class HTMLTable extends Table {
     HTML += "</tbody>";
 
     HTML += "</table></body>";
-    console.log(`data:text/html;base64,${btoa(HTML)}`);
+    console.log(HTML);
   }
 }
