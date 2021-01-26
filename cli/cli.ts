@@ -77,7 +77,7 @@ if (args.json) {
     const { discount = 100, final = 0 } = offer.price || {};
 
     let value: string;
-    if (offer.price?.discount === 100) {
+    if (discount === 100) {
       value = "free".fontcolor("#00ff00");
     } else {
       const [r, g, b] = colorize(final, discount);
@@ -103,7 +103,8 @@ if (args.json) {
     const { discount = 100, final = 0 } = offer.price || {};
 
     let value: string;
-    if (offer.price?.discount === 100) {
+    // console.log(v)
+    if (discount === 100) {
       value = colors.rgb24("free", 0x00ff00);
     } else {
       const [r, g, b] = colorize(final, discount);
