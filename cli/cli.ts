@@ -55,21 +55,23 @@ if (args.help) showHelpAndExit();
 const categories = args.categories?.split(",");
 const providers = args.providers?.split(",");
 
-const games = (await gamedb.queryOffers(categories, providers))
-  // remove offers with discount === 0
-  .filter((o) => o.price?.discount !== 0)
-  // sorts by descending discount
-  .sort((o0, o1) => (o1.price?.discount || 100) - (o0.price?.discount || 100));
+const offers = await gamedb
+  .queryOffers(categories, providers)
+  .then((offers) =>
+    offers.sort((o0, o1) =>
+      (o1.price?.discount || 100) - (o0.price?.discount || 100)
+    )
+  );
 
 if (args.json) {
-  console.log(JSON.stringify(games));
+  console.log(JSON.stringify(offers));
 } else if (args.html) {
   const table = new HTMLTable({
     "Title": undefined,
     "Price": { align: "right" },
   });
 
-  games.forEach((offer) => {
+  offers.forEach((offer) => {
     const title =
       `<a target="_blank" rel="noopener noreferrer" href="${offer.link}">${offer.title}</a>`;
     const { discount = 100, final = 0 } = offer.price || {};
@@ -95,7 +97,7 @@ if (args.json) {
     "Link": { align: "none", normalize: false },
   });
 
-  games.forEach((offer) => {
+  offers.forEach((offer) => {
     const title = offer.title;
 
     const { discount = 100, final = 0 } = offer.price || {};

@@ -39,7 +39,12 @@ export async function queryOffers(
       .filter((query) => names.includes(query.name));
   }
 
-  return (await Promise
-    .all(queries.map((provider) => provider.query())))
-    .flat();
+  const promises = queries.map((provider) =>
+    provider
+      .query()
+      // remove non-promotions (0% discount)
+      .then((offers) => offers.filter((offer) => offer.price?.discount !== 0))
+  );
+
+  return (await Promise.all(promises)).flat();
 }
