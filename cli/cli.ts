@@ -86,7 +86,7 @@ function colorize(value = 0, percentage = 100): string {
 const table = new Table({
   "Title": undefined,
   "Price": undefined,
-  "Link": { align: "none" },
+  "Link": { align: "none", normalize: false },
 });
 
 games

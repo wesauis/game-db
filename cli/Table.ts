@@ -2,6 +2,7 @@ import { colors } from "./deps.ts";
 
 interface Options {
   align?: "left" | "right" | "none";
+  normalize?: boolean;
 }
 
 interface ColumnOptions {
@@ -13,13 +14,13 @@ interface HeaderColumnOptions {
 }
 
 /**
- * Given an array of strings, remove non-ascii characters except \x1b (used for colors)
+ * Removes non-ascii characters except \x1b (used for colors)
  * 
  * @param row
  */
-function normalize(row: string[]): string[] {
+function normalize(value: string): string {
   // deno-lint-ignore no-control-regex
-  return row.map((value) => value.replaceAll(/[^\x1b -~]/g, ""));
+  return value.replaceAll(/[^\x1b -~]/g, "");
 }
 
 /**
@@ -62,10 +63,10 @@ export default class Table {
   #rows: string[][] = [];
   constructor(header?: string[] | HeaderColumnOptions) {
     if (Array.isArray(header)) {
-      this.#header = normalize(header);
+      this.#header = header.map(normalize);
       this.updateWidths(this.#header);
     } else if (typeof header === "object") {
-      this.#header = normalize(Object.keys(header));
+      this.#header = Object.keys(header).map(normalize);
       this.updateWidths(this.#header);
 
       Object.values(header).forEach((value, index) => {
@@ -86,7 +87,13 @@ export default class Table {
   }
 
   add(row: string[]): void {
-    const normalized = normalize(row);
+    const normalized = row.map((value, index) => {
+      const { normalize: mustNormalize = true } = this.#config[index] || {};
+
+      if (mustNormalize) return normalize(value);
+
+      return value;
+    });
 
     this.#rows.push(normalized);
     this.updateWidths(normalized);
