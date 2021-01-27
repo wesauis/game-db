@@ -1,7 +1,6 @@
 if (!import.meta.main) throw new Error("cli only");
 
 import logger, { Logger } from "../log/logger.ts";
-import { colorize } from "./colorize.ts";
 import {
   Args,
   listCategories,
@@ -9,8 +8,8 @@ import {
   parseArgs,
   queryOffers,
 } from "./deps.ts";
+import { tableHTML } from "./table-html.ts";
 import { table } from "./table.ts";
-import HTMLTable from "./table/html.ts";
 
 function showHelpAndExit() {
   console.log(
@@ -22,7 +21,8 @@ Options:
   --help          show this help message
   --debug         enables logger
   --json          prints raw json to stdout
-  --html          prints the html to the terminal (windows example: \`game-db --html > .html && start .html\`)
+  --html          prints the html to the terminal
+                  example (windows powershell): \`game-db --html > $env:temp/game-db.html && start $env:temp/game-db.html\`
   --categories    categories to use separated by comma
                   avaliable categories: ${[...listCategories()].join(", ")}
                   example: \`--categories catg1,catg2\`
@@ -68,30 +68,7 @@ const offers = await queryOffers(categories, providers)
 if (args.json) {
   console.log(JSON.stringify(offers));
 } else if (args.html) {
-  const table = new HTMLTable({
-    "Title": undefined,
-    "Price": { align: "right" },
-  });
-
-  offers.forEach((offer) => {
-    const title =
-      `<a target="_blank" rel="noopener noreferrer" href="${offer.link}">${offer.title}</a>`;
-    const { discount = 100, final = 0 } = offer.price || {};
-
-    let value: string;
-    if (discount === 100) {
-      value = "free".fontcolor("#00ff00");
-    } else {
-      const [r, g, b] = colorize(final, discount);
-      value = `${final.toFixed(2)} ${
-        `-${discount}%`.fontcolor(`rgb(${r},${g},${b})`)
-      }`;
-    }
-
-    table.add([title, value]);
-  });
-
-  table.render();
+  for (const line of tableHTML(offers)) console.log(line);
 } else {
   for (const line of table(offers)) console.log(line);
 }
