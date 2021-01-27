@@ -1,5 +1,5 @@
-import { GameOfferProvider } from "../GameOfferProvider.ts";
-import GameOffer from "../types/GameOffer.d.ts";
+import { OfferProvider } from "../offer-provider.ts";
+import Offer from "../types/Offer.d.ts";
 import { parseResJson } from "../utils/parsers.ts";
 
 const EPIC_API_URL = "https://www.epicgames.com/graphql";
@@ -108,9 +108,10 @@ interface EpicGame {
   };
 }
 
-export default class EpicStore extends GameOfferProvider {
-  constructor(category: "free" | "discounted") {
-    super("epic-store", category);
+export default class EpicStore extends OfferProvider {
+  public readonly name: string = "epic-store";
+  constructor(public readonly category: "free" | "discounted") {
+    super();
   }
 
   private buildBody(page: number): string {
@@ -134,7 +135,7 @@ export default class EpicStore extends GameOfferProvider {
     );
   }
 
-  private parseGame(game: EpicGame): GameOffer {
+  private parseGame(game: EpicGame): Offer {
     let price;
     if (this.category === "discounted") {
       const {
@@ -183,23 +184,16 @@ export default class EpicStore extends GameOfferProvider {
 
         total = Math.ceil(paging.total / 250);
         current += 1;
-        this.logger.info(
-          `found ${games.length} games at page ${current} of ${total}`,
-        );
       } while (current < total);
     } catch (error) {
-      this.logger.requestError(error);
+      console.error(error)
     }
 
     return pages.flat();
   }
 
-  async query(): Promise<GameOffer[]> {
-    this.logger.info("query started");
-
+  async query(): Promise<Offer[]> {
     const games = await this.fetchPages();
-
-    this.logger.info(`query ended: ${games.length} games found`);
 
     return games.map((game) => this.parseGame(game));
   }

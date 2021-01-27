@@ -1,6 +1,5 @@
 if (!import.meta.main) throw new Error("cli only");
 
-import logger, { Logger } from "../log/logger.ts";
 import {
   Args,
   listCategories,
@@ -19,7 +18,6 @@ query games from all providers and output the json to the stdout
 
 Options: 
   --help          show this help message
-  --debug         enables logger
   --json          prints raw json to stdout
   --html          prints the html to the terminal
                   example (windows powershell): \`game-db --html > $env:temp/game-db.html && start $env:temp/game-db.html\`
@@ -38,12 +36,10 @@ Env:
 }
 
 const args = parseArgs(Deno.args, {
-  boolean: ["help", "json", "debug", "html"],
+  boolean: ["help", "json", "html"],
   string: ["categories", "providers"],
   unknown(arg) {
-    logger.warn("unknown argument", arg, "\n");
-
-    showHelpAndExit();
+    console.warn(`unknown argument: '${arg}', use --help for help`);
   },
 }) as Args & {
   help: boolean;
@@ -52,7 +48,6 @@ const args = parseArgs(Deno.args, {
   providers?: string;
 };
 
-if (!args.debug) Logger.ENABLED = false;
 if (args.help) showHelpAndExit();
 
 const categories = args.categories?.split(",");

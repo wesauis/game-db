@@ -1,4 +1,4 @@
-export default interface GameOffer {
+export default interface Offer {
   /** provider name */
   provider: string;
 

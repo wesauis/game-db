@@ -1,5 +1,5 @@
 import { colorize } from "./colorize.ts";
-import { colors, GameOffer } from "./deps.ts";
+import { colors, Offer } from "./deps.ts";
 
 function normalize(str: string): string {
   return str.replaceAll(/[^ -~]/g, "");
@@ -12,7 +12,7 @@ function padRight(str: string, size: number): string {
   return new Array(Math.max(size - width, 0)).join(" ") + str;
 }
 
-export function* table(offers: GameOffer[]) {
+export function* table(offers: Offer[]) {
   const widths: number[] = [5, 5];
   const rows: string[][] = [];
 

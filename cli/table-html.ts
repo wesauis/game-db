@@ -1,11 +1,11 @@
 import { colorize } from "./colorize.ts";
-import { GameOffer } from "./deps.ts";
+import { Offer } from "./deps.ts";
 
 function normalize(str: string): string {
   return str.replaceAll(/[^ -~]/g, "");
 }
 
-export function* tableHTML(offers: GameOffer[]) {
+export function* tableHTML(offers: Offer[]) {
   // skeleton css
   yield `<head>
   <title>game-db results</title>

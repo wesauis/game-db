@@ -1,5 +1,5 @@
-import { GameOfferProvider } from "../GameOfferProvider.ts";
-import type GameOffer from "../types/GameOffer.d.ts";
+import { OfferProvider } from "../offer-provider.ts";
+import type Offer from "../types/Offer.d.ts";
 import { parseResJson } from "../utils/parsers.ts";
 
 const GOG_API_URL =
@@ -23,12 +23,13 @@ interface GoGGame {
   url: string;
 }
 
-export default class GoG extends GameOfferProvider {
-  constructor(category: "free" | "discounted") {
-    super("gog", category);
+export default class GoG extends OfferProvider {
+  public readonly name = "gog";
+  constructor(public readonly category: "free" | "discounted") {
+    super();
   }
 
-  private static parseGame(game: GoGGame): GameOffer {
+  private static parseGame(game: GoGGame): Offer {
     return {
       provider: "gog",
       title: game.title,
@@ -57,25 +58,17 @@ export default class GoG extends GameOfferProvider {
         total = page.totalPages;
         games.push(page.products);
 
-        this.logger.info(
-          `found ${page.products.length} games at page ${current} of ${total}`,
-        );
-
         current += 1;
       } while (current <= total);
     } catch (error) {
-      this.logger.requestError(error);
+      console.error(error);
     }
 
     return games.flat();
   }
 
-  async query(): Promise<GameOffer[]> {
-    this.logger.info("query started");
-
+  async query(): Promise<Offer[]> {
     const games = await this.fetchGames();
-
-    this.logger.info(`query ended: ${games.length} games found`);
 
     return games.map(GoG.parseGame);
   }

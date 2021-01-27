@@ -1,8 +1,8 @@
 import providers from "./provider-registry.ts";
-import GameOffer from "./types/GameOffer.d.ts";
+import Offer from "./types/Offer.d.ts";
 
 export { providers };
-export type { GameOffer };
+export type { Offer };
 
 /**
  * list all registered provider categories
@@ -26,7 +26,7 @@ export function listNames(): Set<string> {
 export async function queryOffers(
   categories?: string[],
   names?: string[],
-): Promise<GameOffer[]> {
+): Promise<Offer[]> {
   let queries = providers;
 
   if (categories) {
@@ -46,5 +46,6 @@ export async function queryOffers(
       .then((offers) => offers.filter((offer) => offer.price?.discount !== 0))
   );
 
-  return (await Promise.all(promises)).flat();
+  const offers = (await Promise.all(promises)).flat();
+  return offers;
 }

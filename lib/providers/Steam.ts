@@ -1,11 +1,11 @@
 import type { Element } from "../deps.ts";
-import { GameOfferProvider } from "../GameOfferProvider.ts";
-import type GameOffer from "../types/GameOffer.d.ts";
+import { OfferProvider } from "../offer-provider.ts";
+import type Offer from "../types/Offer.d.ts";
 import {
   parseElements,
   parseHTML,
   parseNum,
-  parseResJson
+  parseResJson,
 } from "../utils/parsers.ts";
 
 const REQUEST_LIMIT = 8;
@@ -19,12 +19,11 @@ interface SteamRows {
   total_count: number;
 }
 
-export default class Steam extends GameOfferProvider {
-  constructor() {
-    super("steam", "discounted");
-  }
+export default class Steam extends OfferProvider {
+  public readonly name = "steam";
+  public readonly category = "discounted";
 
-  private static parseGame(game: Element): GameOffer {
+  private static parseGame(game: Element): Offer {
     const $title = game.querySelector(".title")!;
     const $discount = game.querySelector(".search_discount span")!;
 
@@ -64,17 +63,9 @@ export default class Steam extends GameOfferProvider {
 
         total = Math.ceil(data.total_count / 100);
         current += 1;
-        this.logger.info(`fethed games at page ${current} of ${total}`);
       } while (current < total && current < REQUEST_LIMIT);
-
-      if (current < total) {
-        // the limit is used to reduce the number of request to the steam server
-        // I don't want to abuse
-        // and btw, after the 8th page the games are not so great anymore :}
-        this.logger.info(`reached page ${REQUEST_LIMIT}, stopping`);
-      }
     } catch (error) {
-      this.logger.requestError(error);
+      console.error(error);
     }
 
     return `<body>${
@@ -84,13 +75,9 @@ export default class Steam extends GameOfferProvider {
     }</body>`;
   }
 
-  async query(): Promise<GameOffer[]> {
-    this.logger.info("query started");
-
+  async query(): Promise<Offer[]> {
     const html = parseHTML(await this.fetchRowsHTML());
     const elements = parseElements(html.querySelectorAll(".search_result_row"));
-
-    this.logger.info(`query ended: ${elements.length} games found`);
 
     return elements.map(Steam.parseGame);
   }
