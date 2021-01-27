@@ -1,11 +1,16 @@
 if (!import.meta.main) throw new Error("cli only");
 
-import { Args } from "https://deno.land/std@0.84.0/flags/mod.ts";
 import logger, { Logger } from "../log/logger.ts";
 import { colorize } from "./colorize.ts";
-import { colors, gamedb, parseArgs } from "./deps.ts";
+import {
+  Args,
+  listCategories,
+  listNames,
+  parseArgs,
+  queryOffers,
+} from "./deps.ts";
+import { table } from "./table.ts";
 import HTMLTable from "./table/html.ts";
-import TerminalTable from "./table/termainal.ts";
 
 function showHelpAndExit() {
   console.log(
@@ -19,12 +24,10 @@ Options:
   --json          prints raw json to stdout
   --html          prints the html to the terminal (windows example: \`game-db --html > .html && start .html\`)
   --categories    categories to use separated by comma
-                  avaliable categories: ${
-      [...gamedb.listCategories()].join(", ")
-    }
+                  avaliable categories: ${[...listCategories()].join(", ")}
                   example: \`--categories catg1,catg2\`
   --providers     provider names to use separated by comma
-                  avaliable providers: ${[...gamedb.listNames()].join(", ")}
+                  avaliable providers: ${[...listNames()].join(", ")}
                   example: \`--providers name1,name2\`
 
 Env:
@@ -55,8 +58,7 @@ if (args.help) showHelpAndExit();
 const categories = args.categories?.split(",");
 const providers = args.providers?.split(",");
 
-const offers = await gamedb
-  .queryOffers(categories, providers)
+const offers = await queryOffers(categories, providers)
   .then((offers) =>
     offers.sort((o0, o1) =>
       (o1.price?.discount || 100) - (o0.price?.discount || 100)
@@ -91,30 +93,5 @@ if (args.json) {
 
   table.render();
 } else {
-  const table = new TerminalTable({
-    "Title": undefined,
-    "Price": { align: "right" },
-    "Link": { align: "none", normalize: false },
-  });
-
-  offers.forEach((offer) => {
-    const title = offer.title;
-
-    const { discount = 100, final = 0 } = offer.price || {};
-
-    let value: string;
-    // console.log(v)
-    if (discount === 100) {
-      value = colors.rgb24("free", 0x00ff00);
-    } else {
-      const [r, g, b] = colorize(final, discount);
-      value = `${final.toFixed(2)} ${
-        colors.rgb24(`-${discount}%`, { r, g, b })
-      }`;
-    }
-
-    table.add([title, value, offer.link]);
-  });
-
-  table.render();
+  for (const line of table(offers)) console.log(line);
 }
