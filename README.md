@@ -1,6 +1,6 @@
 # Game DB
 
->  v0.1.0
+> v0.1.0
 
 _find free or really good game offers_
 
@@ -24,6 +24,7 @@ deno install --allow-net --name game-db https://github.com/wesauis/game-db/raw/0
 ```
 
 # Usage
+
 ```sh
 game-db --help
 ```

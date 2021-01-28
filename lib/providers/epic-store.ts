@@ -186,7 +186,7 @@ export default class EpicStore extends OfferProvider {
         current += 1;
       } while (current < total);
     } catch (error) {
-      console.error(error)
+      console.error(error);
     }
 
     return pages.flat();
