@@ -1,6 +1,6 @@
 import type { Element } from "../deps.ts";
 import { OfferProvider } from "../offer-provider.ts";
-import type Offer from "../types/Offer.d.ts";
+import type { Offer } from "../types/Offer.d.ts";
 import {
   parseElements,
   parseHTML,
