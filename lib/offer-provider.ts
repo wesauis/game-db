@@ -1,11 +1,29 @@
-import type Offer from "./types/Offer.d.ts";
+import type { Offer } from "./types/Offer.d.ts";
 
 export abstract class OfferProvider {
-  public abstract readonly name: string;
-  public abstract readonly category: string;
+  public readonly provider: string;
+  constructor(
+    public readonly name: string,
+    public readonly category: string,
+    /** Time between querys in milisseconds */
+    public readonly delay: number,
+  ) {
+    this.provider = `${this.name}/${this.category}`;
+  }
 
-  /**
-   * search and returns all offers
-   */
-  abstract query(): Promise<Offer[]>;
+  /** Returns `true` if out of the query delay */
+  public outOfDelay(lastRun: Date): boolean {
+    return lastRun.getTime() + this.delay < Date.now();
+  }
+
+  /** Search and returns all offers */
+  protected abstract _query(): Promise<Offer[]>;
+
+  public async query(lastRun: Date, force = false): Promise<Offer[]> {
+    if (force || this.outOfDelay(lastRun)) {
+      return await this._query();
+    } else {
+      return [];
+    }
+  }
 }
