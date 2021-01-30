@@ -1,29 +1,25 @@
 import providers from "./provider-registry.ts";
-import Offer from "./types/Offer.d.ts";
+import { Offer } from "./types/Offer.d.ts";
 
 export { providers };
 export type { Offer };
 
-/**
- * list all registered provider categories
- */
+/** List all registered provider categories */
 export function listCategories(): Set<string> {
   return new Set(providers
     .map((provider) => provider.category));
 }
 
-/**
- * list all registered provider names
- */
+/** List all registered provider names */
 export function listNames(): Set<string> {
   return new Set(providers
     .map((provider) => provider.name));
 }
 
-/**
- * query all offers that math the filter
- */
+/** Query all offers that math the filter */
 export async function queryOffers(
+  lastRun: Date,
+  force = false,
   categories?: string[],
   names?: string[],
 ): Promise<Offer[]> {
@@ -41,11 +37,12 @@ export async function queryOffers(
 
   const promises = queries.map((provider) =>
     provider
-      .query()
+      .query(lastRun, force)
       // remove non-promotions (0% discount)
-      .then((offers) => offers.filter((offer) => offer.price?.discount !== 0))
+      .then((offers) =>
+        offers.filter((offer) => offer.offer?.discountPercentage !== 0)
+      )
   );
 
-  const offers = (await Promise.all(promises)).flat();
-  return offers;
+  return (await Promise.all(promises)).flat();
 }

@@ -1,20 +1,20 @@
 import type { Element, HTMLDocument, NodeList } from "../deps.ts";
 import { DOMParser } from "../deps.ts";
 
-/**
- * @returns if `response.ok`, the parsed json
- * @throws if `!response.ok`, the response
- * @example
- *   try {
- *     const json = fetch('someapi.com')
- *       .then(parseResJson) as Type
- *   } catch(error) {
- *     if (error instanceOf Error) {
- *       // network error
- *     } else {
- *       // request error
- *     } 
- *   }
+/** Parses the reponse body as json if `reponse.ok` throws the response or the error otherwise
+ * 
+ * ```ts
+ * try {
+ *   const json = fetch('someapi.com')
+ *     .then(parseResJson) as Type
+ * } catch(error) {
+ *   if (error instanceOf Error) {
+ *     // network error
+ *   } else {
+ *     // request error
+ *   } 
+ * }
+ * ```
  */
 export function parseResJson(res: Response): Promise<unknown> {
   if (res.ok) {
@@ -24,20 +24,20 @@ export function parseResJson(res: Response): Promise<unknown> {
   }
 }
 
-/**
- * @returns if `response.ok`, the response text
- * @throws if `!response.ok`, the response
- * @example
- *   try {
- *     const text = fetch('example.com')
- *       .then(parseResText) as Type
- *   } catch(error) {
- *     if (error instanceOf Error) {
- *       // network error
- *     } else {
- *       // request error
- *     } 
- *   }
+/** Parses the reponse body as text if `reponse.ok` throws the response or the error otherwise
+ * 
+ * ```ts
+ * try {
+ *   const text = fetch('example.com')
+ *     .then(parseResText) as Type
+ * } catch(error) {
+ *   if (error instanceOf Error) {
+ *     // network error
+ *   } else {
+ *     // request error
+ *   } 
+ * }
+ * ```
  */
 export function parseResText(res: Response): Promise<string> {
   if (res.ok) {
@@ -47,16 +47,15 @@ export function parseResText(res: Response): Promise<string> {
   }
 }
 
-/**
- * converts a string into a number
- * ignores all non numbers and comma
+/** Converts a string into a number
  * 
- * @param str 
- * @returns number
- * @throws if result is NaN
+ * Ignores all non numbers and extra commas
  * 
- * @example
- *   parseNum('USD 3.000,6') => 3000.6
+ * If NaN will throw a error
+ * 
+ * ```ts
+ * parseNum('USD 3.000,6')// => 3000.6
+ * ```
  */
 export function parseNum(str: string | null) {
   // remove non numbers and commas
@@ -81,11 +80,7 @@ export function parseNum(str: string | null) {
 }
 
 const domParser = new DOMParser();
-/**
- * converts a string into a HTMLDocument
- * 
- * @param html 
- */
+/** Converts a string into a HTMLDocument */
 export function parseHTML(text: string): HTMLDocument {
   const html = domParser.parseFromString(text, "text/html");
 
@@ -94,11 +89,7 @@ export function parseHTML(text: string): HTMLDocument {
   throw new Error("invalid html");
 }
 
-/**
- * converts a nodelist into a array
- * 
- * @param nodeList 
- */
+/** Converts a nodelist into a array */
 export function parseElements(nodeList: NodeList): Element[] {
   return Array.from(nodeList as Iterable<Element>);
 }

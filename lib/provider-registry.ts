@@ -3,8 +3,7 @@ import EpicStore from "./providers/epic-store.ts";
 import GoG from "./providers/gog.ts";
 import Steam from "./providers/steam.ts";
 
-/**
- * All registered providers.
+/** All registered providers.
  * 
  * You can add your own just by using `providers.push(yourProvider)`
  */

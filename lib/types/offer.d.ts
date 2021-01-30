@@ -1,4 +1,4 @@
-export default interface Offer {
+export interface Offer {
   /** provider name */
   provider: string;
 
@@ -11,13 +11,15 @@ export default interface Offer {
   /** offer link */
   link: string;
 
-  /** offer pricing */
-  price?: {
-    /** base/original price */
-    base: number;
-    /** price with discount */
-    final: number;
-    /** discount percentage */
-    discount: number;
-  };
+  /** price, 0 if free forever */
+  price: number;
+  /** discount, undefined if free forever */
+  discount?: OfferDiscount;
+}
+
+export interface OfferDiscount {
+  startDate: Date;
+  endDate: Date;
+  discountPrice: number;
+  discountPercentage: number;
 }
