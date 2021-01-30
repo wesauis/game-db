@@ -6,7 +6,7 @@ export type RGB = [number, number, number];
  * @param value 
  * @param percentage 
  */
-export function colorize(value: number, percentage: number): RGB {
+export function colorize(percentage: number): RGB {
   // scalles the value from 0-100 to 0-255
   const scalled = Math.floor(Math.max(percentage * 2.55, 0));
 
