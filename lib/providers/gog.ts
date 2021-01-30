@@ -19,7 +19,14 @@ export default class GoG extends OfferProvider {
   async _query(): Promise<Offer[]> {
     const products = await this.fetchProducts();
 
-    return products.map((product) => this.toOffer(product));
+    const offers: Offer[] = [];
+    products.forEach((product) => {
+      const offer = this.toOffer(product);
+      if (offer) {
+        offers.push(offer);
+      }
+    });
+    return offers;
   }
 
   private async fetchProducts(): Promise<GoGProduct[]> {
@@ -44,8 +51,13 @@ export default class GoG extends OfferProvider {
     return productPages.flat();
   }
 
-  private toOffer(product: GoGProduct): Offer {
+  private toOffer(product: GoGProduct): Offer | undefined {
     const [price, discount] = this.getDiscount(product);
+
+    // not discountd and not free, NOT A RESULT
+    if (!product.price.isDiscounted && !product.price.isFree) {
+      return undefined;
+    }
 
     return {
       provider: this.provider,
