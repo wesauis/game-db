@@ -12,35 +12,39 @@ function padRight(str: string, size: number): string {
   return new Array(Math.max(size - width, 0)).join(" ") + str;
 }
 
+const TITLE = 0, PRICE = 1;
+
 export function* table(offers: Offer[]) {
   const widths: number[] = [5, 5];
   const rows: string[][] = [];
 
   offers.forEach((offer) => {
     const title = normalize(offer.title);
-    if (widths[0] <= title.length) {
-      widths[0] = title.length;
+    if (widths[TITLE] <= title.length) {
+      widths[TITLE] = title.length;
     }
 
-    const { discount = 100, final = 0 } = offer.price || {};
-    let price: string;
-    if (discount === 100) {
-      price = colors.rgb24("free", 0x00ff00);
+    let formattedPrice: string;
+
+    const { price } = offer;
+    if (!price) {
+      formattedPrice = colors.rgb24("free", 0x00ff00);
     } else {
-      const [r, g, b] = colorize(final, discount);
+      const { discountPrice, discountPercentage } = offer.discount!;
+      const [r, g, b] = colorize(discountPercentage);
 
-      const price_ = final.toFixed(2);
-      const discount_ = `-${discount}%`;
+      const price = discountPrice.toFixed(2);
+      const percentage = `-${discountPercentage}%`;
 
-      const width = price_.length + discount_.length + 2;
-      if (widths[1] < title.length) {
-        widths[1] = width;
+      const width = price.length + percentage.length + 1;
+      if (widths[PRICE] < width) {
+        widths[PRICE] = width;
       }
 
-      price = `${price_} ${colors.rgb24(discount_, { r, g, b })}`;
+      formattedPrice = `${price} ${colors.rgb24(percentage, { r, g, b })}`;
     }
 
-    rows.push([title, price, offer.link]);
+    rows.push([title, formattedPrice, offer.link]);
   });
 
   const [titleW, priceW] = widths;
