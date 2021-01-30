@@ -24,19 +24,22 @@ export function* tableHTML(offers: Offer[]) {
   for (const offer of offers) {
     const title =
       `<a target="_blank" rel="noopener noreferrer" href="${offer.link}">${offer.title}</a>`;
-    const { discount = 100, final = 0 } = offer.price || {};
 
-    let value: string;
-    if (discount === 100) {
-      value = "free".fontcolor("#00ff00");
+    let formattedPrice: string;
+    const { price } = offer;
+
+    if (!price) {
+      formattedPrice = "free".fontcolor("#00ff00");
     } else {
-      const [r, g, b] = colorize(final, discount);
-      value = `${
-        final.toFixed(2)
-      } ${`<span style="color: rgb(${r},${g},${b})">-${discount}%</span>`}`;
+      const { discountPrice, discountPercentage } = offer.discount!;
+      const [r, g, b] = colorize(discountPercentage);
+
+      formattedPrice = `${
+        discountPrice.toFixed(2)
+      } ${`<span style="color: rgb(${r},${g},${b})">-${discountPercentage}%</span>`}`;
     }
 
-    yield `<tr><th>${normalize(title)}</th><th>${value}</tr></th>`;
+    yield `<tr><th>${normalize(title)}</th><th>${formattedPrice}</tr></th>`;
   }
 
   // table end
