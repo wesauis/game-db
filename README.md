@@ -1,8 +1,14 @@
 # Game DB
 
-> v0.1.0
+Find free games or really good offers
 
-_find free or really good game offers_
+# CLI
+
+```sh
+deno install --allow-net --name game-db https://github.com/wesauis/game-db/raw/0.1.0/mod.ts
+```
+
+Use `game-db --help` for help!
 
 # API
 
@@ -13,18 +19,4 @@ import {
 } from "https://github.com/wesauis/game-db/raw/0.1.0/mod.ts";
 
 console.log(await queryOffers(Object.values(providers.free)));
-```
-
-# CLI
-
-## Intalation
-
-```sh
-deno install --allow-net --name game-db https://github.com/wesauis/game-db/raw/0.1.0/mod.ts
-```
-
-# Usage
-
-```sh
-game-db --help
 ```
