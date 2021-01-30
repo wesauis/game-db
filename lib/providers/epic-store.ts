@@ -1,117 +1,56 @@
 import { OfferProvider } from "../offer-provider.ts";
-import Offer from "../types/Offer.d.ts";
+import type { Offer, OfferDiscount } from "../types/Offer.d.ts";
 import { parseResJson } from "../utils/parsers.ts";
-
-const EPIC_API_URL = "https://www.epicgames.com/graphql";
-
-const EPIC_GRAPHQL_QUERY = `query searchStoreQuery(
-  $category: String = "games/edition/base|bundles/games|editors|software/edition/base"
-  
-  $allowCountries: String
-  $country: String!
-  $locale: String
-  
-  $start: Int
-  $count: Int
-
-  $onSale: Boolean
-  $freeGame: Boolean
-) {
-  Catalog {
-    searchStore(
-      category: $category
-      
-      allowCountries: $allowCountries
-      country: $country
-      locale: $locale
-      
-      count: $count
-      start: $start
-
-      onSale: $onSale
-      freeGame: $freeGame
-    ) {
-      elements {
-        title
-        seller {
-          name
-        }
-        productSlug
-        price(country: $country) {
-          totalPrice {
-            discountPrice
-            originalPrice
-            currencyInfo {
-              decimals
-            }
-          }
-        }
-        promotions(category: $category) @include(if: false) {
-          promotionalOffers {
-            promotionalOffers {
-              startDate
-              endDate
-              discountSetting {
-                discountType
-                discountPercentage
-              }
-            }
-          }
-          upcomingPromotionalOffers {
-            promotionalOffers {
-              startDate
-              endDate
-              discountSetting {
-                discountType
-                discountPercentage
-              }
-            }
-          }
-        }
-      }
-      paging {
-        count
-        total
-      }
-    }
-  }
-}`;
-
-interface EpicPage {
-  data: {
-    Catalog: {
-      searchStore: {
-        elements: EpicGame[];
-        paging: {
-          count: number;
-          total: number;
-        };
-      };
-    };
-  };
-}
-
-interface EpicGame {
-  title: string;
-  seller: {
-    name: string;
-  };
-  productSlug: string;
-  price: {
-    totalPrice: {
-      discountPrice: number;
-      originalPrice: number;
-      currencyInfo: {
-        decimals: number;
-      };
-    };
-  };
-}
+import time from "../utils/time.ts";
+import { EPIC_API_URL, EPIC_GRAPHQL_QUERY } from "./epic-store.const.ts";
+import type { EpicPage, EpicProduct } from "./epic-store.d.ts";
 
 export default class EpicStore extends OfferProvider {
-  public readonly name: string = "epic-store";
   constructor(public readonly category: "free" | "discounted") {
-    super();
+    super(
+      "epic-store",
+      category,
+      category === "free" ? time(5, "DAYS") : time(18, "HOURS"),
+    );
+  }
+
+  async _query(): Promise<Offer[]> {
+    const products = await this.fetchProducts();
+
+    return products.map((product) => this.toOffer(product));
+  }
+
+  private async fetchProducts(): Promise<EpicProduct[]> {
+    const productPages: EpicProduct[][] = [];
+
+    try {
+      let currentPage = 0, totalPages = 0;
+
+      do {
+        const page = await fetch(
+          EPIC_API_URL,
+          {
+            method: "POST",
+            headers: {
+              "content-type": "application/json;charset=UTF-8",
+            },
+            body: this.buildBody(currentPage),
+          },
+        ).then(parseResJson) as EpicPage;
+
+        delete page["extensions"];
+
+        const { elements: products, paging } = page.data.Catalog.searchStore;
+        productPages.push(products);
+
+        totalPages = Math.ceil(paging.total / 250);
+        currentPage += 1;
+      } while (currentPage < totalPages);
+    } catch (error) {
+      console.error(error);
+    }
+
+    return productPages.flat();
   }
 
   private buildBody(page: number): string {
@@ -135,66 +74,60 @@ export default class EpicStore extends OfferProvider {
     );
   }
 
-  private parseGame(game: EpicGame): Offer {
-    let price;
-    if (this.category === "discounted") {
-      const {
-        originalPrice,
-        discountPrice,
-        currencyInfo: { decimals },
-      } = game.price.totalPrice;
+  private toOffer(product: EpicProduct): Offer {
+    let publisher, developer;
+    product.customAttributes.forEach(({ key, value }) => {
+      switch (key) {
+        case "publisherName":
+          publisher = value;
+          break;
+        case "developerName":
+          developer = value;
+          break;
+      }
+    });
+    publisher = publisher || product.seller.name;
 
-      const scale = 10 ** decimals;
-      const base = originalPrice / scale;
-      const final = discountPrice / scale;
-      const discount = (base - final) / base * 100;
-
-      price = { base, final, discount: Math.round(discount) };
-    }
+    const [price, discount] = this.getDiscount(product);
 
     return {
-      provider: "epic-store",
-      title: game.title,
-      publisher: game.seller.name,
+      provider: this.provider,
+      title: product.title,
+      publisher,
+      developer,
+      link:
+        `https://www.epicgames.com/store/en-US/product/${product.productSlug}`,
       price,
-      link: `https://www.epicgames.com/store/en-US/product/${game.productSlug}`,
+      discount,
     };
   }
 
-  private async fetchPages(): Promise<EpicGame[]> {
-    const pages: EpicGame[][] = [];
+  private getDiscount(
+    product: EpicProduct,
+  ): [number, OfferDiscount | undefined] {
+    if (this.category === "free") return [0, undefined];
 
-    try {
-      let current = 0, total = 0;
+    const { decimals } = product.price.totalPrice.currencyInfo;
+    const { originalPrice, discountPrice, discount } = product.price.totalPrice;
 
-      do {
-        const data = await fetch(
-          EPIC_API_URL,
-          {
-            method: "POST",
-            headers: {
-              "content-type": "application/json;charset=UTF-8",
-            },
-            body: this.buildBody(current),
-          },
-        ).then(parseResJson) as EpicPage;
+    const scale = 10 ** decimals;
+    const price = originalPrice / scale;
 
-        const { elements: games, paging } = data.data.Catalog.searchStore;
-        pages.push(games);
+    const { lineOffers } = product.price;
+    const endDate = lineOffers?.[0]?.appliedRules?.[0]?.endDate;
 
-        total = Math.ceil(paging.total / 250);
-        current += 1;
-      } while (current < total);
-    } catch (error) {
-      console.error(error);
+    if (!endDate) {
+      console.warn(`endDate is undefined:`, { product });
     }
 
-    return pages.flat();
-  }
-
-  async query(): Promise<Offer[]> {
-    const games = await this.fetchPages();
-
-    return games.map((game) => this.parseGame(game));
+    return [
+      price,
+      {
+        startDate: new Date(product.effectiveDate),
+        endDate: new Date(endDate),
+        discountPrice: discountPrice / scale,
+        discountPercentage: Math.round(discount / originalPrice * 100),
+      },
+    ];
   }
 }
