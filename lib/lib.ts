@@ -35,14 +35,7 @@ export async function queryOffers(
       .filter((query) => names.includes(query.name));
   }
 
-  const promises = queries.map((provider) =>
-    provider
-      .query(lastRun, force)
-      // remove non-promotions (0% discount)
-      .then((offers) =>
-        offers.filter((offer) => offer.offer?.discountPercentage !== 0)
-      )
-  );
-
+  const promises = queries
+    .map((provider) => provider.query(lastRun, force));
   return (await Promise.all(promises)).flat();
 }
