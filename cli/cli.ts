@@ -53,12 +53,14 @@ if (args.help) showHelpAndExit();
 const categories = args.categories?.split(",");
 const providers = args.providers?.split(",");
 
-const offers = await queryOffers(categories, providers)
-  .then((offers) =>
-    offers.sort((o0, o1) =>
-      (o1.price?.discount || 100) - (o0.price?.discount || 100)
-    )
-  );
+const offers = (await queryOffers(new Date(), true, categories, providers))
+  // order: free-forever, 100 - 0
+  .sort((offer0, offer1) => {
+    const d0 = !offer0.price ? 101 : offer0.discount?.discountPercentage || 100;
+    const d1 = !offer1.price ? 101 : offer1.discount?.discountPercentage || 100;
+
+    return d1 - d0;
+  });
 
 if (args.json) {
   console.log(JSON.stringify(offers));
