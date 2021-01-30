@@ -7,6 +7,7 @@ import {
   parseNum,
   parseResJson,
 } from "../utils/parsers.ts";
+import time from "../utils/time.ts";
 
 const REQUEST_LIMIT = 8;
 
@@ -22,6 +23,7 @@ interface SteamRows {
 export default class Steam extends OfferProvider {
   public readonly name = "steam";
   public readonly category = "discounted";
+  public readonly delay = time(18, "HOURS");
 
   private static parseGame(game: Element): Offer {
     const $title = game.querySelector(".title")!;
@@ -75,7 +77,7 @@ export default class Steam extends OfferProvider {
     }</body>`;
   }
 
-  async query(): Promise<Offer[]> {
+  async _query(): Promise<Offer[]> {
     const html = parseHTML(await this.fetchRowsHTML());
     const elements = parseElements(html.querySelectorAll(".search_result_row"));
 

@@ -9,12 +9,12 @@ export type TimeUnit =
   | "MINUTES"
   | "SECONDS";
 
-export default function time(ammount: number, unit: TimeUnit) {
-  if (!Number.isInteger(ammount)) {
-    throw new Error("ammount is not a integer");
+export default function time(amount: number, unit: TimeUnit) {
+  if (!Number.isInteger(amount)) {
+    throw new Error("amount is not a integer");
   }
 
-  let result = ammount;
+  let result = amount;
   switch (unit) {
     case "DAY":
     case "DAYS":

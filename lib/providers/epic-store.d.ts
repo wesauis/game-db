@@ -14,47 +14,43 @@ export interface EpicPage {
   extensions: unknown;
 }
 
+
 export interface EpicProduct {
   /** title */
   title: string;
-  /** publisher and developer */
+  /** publisher & developer */
   customAttributes: EpicKV[];
-  /** publisher fallback */
   seller: {
     /** publisher fallback */
     name: string;
   };
-  /** link: `https://www.epicgames.com/store/en-US/product/${productSlug}` */
+  /** link = `https://www.epicgames.com/store/en-US/product/${productSlug}` */
   productSlug: string;
-  /** price & offer */
   price: {
     totalPrice: {
       /** price = originalPrice / scale */
       originalPrice: number;
-      /** offer.discountPrice = originalPrice / scale */
+      /** discount.discountPrice = discountPrice / scale */
       discountPrice: number;
-      /** offer.discountPercentage = Math.round(discount / originalPrice * 100) */
+      /** discount.discountPercentage = Math.round(discount / originalPrice * 100) */
       discount: number;
-      /** scale */
       currencyInfo: {
         /** scale = 10 ** decimals */
         decimals: number;
       };
     };
-    /** endDate */
     lineOffers: EpicLineOffer[];
   };
-  /** offer.startDate */
+  /** discount.startDate */
   effectiveDate: string;
 }
 
 export interface EpicLineOffer {
-  /** endDate */
   appliedRules: EpicOffer[];
 }
 
 export interface EpicOffer {
-  /** offer.endDate */
+  /** discount.endDate */
   endDate: string;
 }
 

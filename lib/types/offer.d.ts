@@ -18,8 +18,8 @@ export interface Offer {
 }
 
 export interface OfferDiscount {
-  startDate: Date;
-  endDate: Date;
+  startDate?: Date;
+  endDate?: Date;
   discountPrice: number;
   discountPercentage: number;
 }
