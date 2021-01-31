@@ -1,35 +1,34 @@
 if (!import.meta.main) throw new Error("cli only");
 
-import type { Args } from "./deps.ts";
-import { parseArgs, providers } from "./deps.ts";
+import { Args, colors, parseArgs, providers } from "./deps.ts";
+import { tableHTML } from "./formatters/table-html.ts";
+import { table } from "./formatters/table.ts";
+import * as delays from "./persistance/delays.ts";
 import { queryOffers } from "./query-offers.ts";
-import { tableHTML } from "./table-html.ts";
-import { table } from "./table.ts";
 
 function showHelpAndExit() {
+  function joinUnique<T>(arr: T[], field: keyof T, separator = ", "): string {
+    return [...new Set(arr.map((obj) => obj[field]))].join(separator);
+  }
+
   console.log(
-    `Usage: game-db [OPTIONS]
+    `Usage: game-db ${colors.gray("[OPTIONS]")}
 
-query games from all providers and output the json to the stdout
+query offers and free games and show them
 
-Options: 
+${colors.gray("OPTIONS:")}
   --help          show this help message
   --json          prints raw json to stdout
-  --html          prints the html to the terminal
-                  example (windows powershell): \`game-db --html > $env:temp/game-db.html && start $env:temp/game-db.html\`
-  --run-all       run all registered providers                
-  --categories    categories to use separated by comma
-                  avaliable categories: ${
-      [...providers.map((provider) => provider.category)].join(", ")
-    }
-                  example: \`--categories catg1,catg2\`
-  --providers     provider names to use separated by comma
-                  avaliable providers: ${
-      [...providers.map((provider) => provider.name)].join(", ")
-    }
-                  example: \`--providers name1,name2\`
+  --html          prints html to stdout
+  --run-all       run all registered providers
+  --categories <categories>
+                  category filter, separated by comma
+                  possible values: ${joinUnique(providers, "category")}
+  --providers <provider-names>
+                  provider names to use separated by comma
+                  possible values: ${joinUnique(providers, "name")}
 
-Env:
+${colors.gray("ENVIRONMENT:")}
   NO_COLOR        disable colors`,
   );
 
@@ -69,7 +68,15 @@ if (names) {
   });
 }
 
-const results = await queryOffers(choosenProviders, {}, args["run-all"]);
+const lastRuns = delays.load();
+
+const results = await queryOffers(
+  choosenProviders,
+  lastRuns,
+  args["run-all"],
+);
+
+delays.update(lastRuns, results.providers);
 
 if (args.json) {
   console.log(JSON.stringify(results));

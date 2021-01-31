@@ -1,5 +1,5 @@
-import { colorize } from "./colorize.ts";
-import { colors, Offer } from "./deps.ts";
+import { colors, Offer } from "../deps.ts";
+import { colorize } from "../utils/colorize.ts";
 
 function normalize(str: string): string {
   return str.replaceAll(/[^ -~]/g, "");

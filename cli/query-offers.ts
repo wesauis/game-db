@@ -1,9 +1,10 @@
 import type { OfferProvider } from "../lib/offer-provider.ts";
+import { LastRuns } from "./persistance/delays.ts";
 import { QueryResult } from "./query-result.d.ts";
 
 export async function queryOffers(
   providers: OfferProvider[],
-  lastRuns: { [id: string]: Date },
+  lastRuns: LastRuns,
   force = false,
 ): Promise<QueryResult> {
   const querys = providers
