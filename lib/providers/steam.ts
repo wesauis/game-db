@@ -83,7 +83,6 @@ export default class Steam extends OfferProvider {
 
     try {
       return {
-        provider: this.provider,
         title: $title.textContent,
         link: trimSearchParams(element.attributes["href"]),
         price: parseNum(originalPrice),

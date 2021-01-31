@@ -14,7 +14,6 @@ export interface EpicPage {
   extensions: unknown;
 }
 
-
 export interface EpicProduct {
   /** title */
   title: string;

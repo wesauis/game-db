@@ -60,7 +60,6 @@ export default class GoG extends OfferProvider {
     }
 
     return {
-      provider: this.provider,
       title: product.title,
       publisher: product.publisher,
       developer: product.developer,

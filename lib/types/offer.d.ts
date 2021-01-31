@@ -1,7 +1,4 @@
 export interface Offer {
-  /** provider name */
-  provider: string;
-
   /** game title, `title title` */
   title: string;
   /** who published the game */

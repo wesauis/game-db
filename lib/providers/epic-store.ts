@@ -91,7 +91,6 @@ export default class EpicStore extends OfferProvider {
     const [price, discount] = this.getDiscount(product);
 
     return {
-      provider: this.provider,
       title: product.title,
       publisher,
       developer,
