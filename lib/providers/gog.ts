@@ -54,7 +54,7 @@ export default class GoG extends OfferProvider {
   private toOffer(product: GoGProduct): Offer | undefined {
     const [price, discount] = this.getDiscount(product);
 
-    // not discountd and not free, NOT A RESULT
+    // not discounted and not free, NOT A RESULT
     if (!product.price.isDiscounted && !product.price.isFree) {
       return undefined;
     }

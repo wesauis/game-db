@@ -75,7 +75,8 @@ export default class EpicStore extends OfferProvider {
   }
 
   private toOffer(product: EpicProduct): Offer {
-    let publisher, developer;
+    let publisher: Offer["publisher"];
+    let developer: Offer["developer"];
     product.customAttributes.forEach(({ key, value }) => {
       switch (key) {
         case "publisherName":

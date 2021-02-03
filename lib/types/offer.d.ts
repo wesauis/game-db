@@ -1,4 +1,4 @@
-export interface Offer {
+export type Offer = {
   /** game title, `title title` */
   title: string;
   /** who published the game */
@@ -11,12 +11,12 @@ export interface Offer {
   /** price, 0 if free forever */
   price: number;
   /** discount, undefined if free forever */
-  discount?: OfferDiscount;
+  discount?: {
+    startDate?: Date;
+    endDate?: Date;
+    discountPrice: number;
+    discountPercentage: number;
+  };
 }
 
-export interface OfferDiscount {
-  startDate?: Date;
-  endDate?: Date;
-  discountPrice: number;
-  discountPercentage: number;
-}
+export type OfferDiscount = NonNullable<Offer['discount']>;

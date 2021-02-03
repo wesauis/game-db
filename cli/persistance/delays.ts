@@ -2,9 +2,7 @@ import { existsSync } from "../deps.ts";
 import { dateReviver, readJSON, writeJSON } from "./json.ts";
 import { paths } from "./paths.ts";
 
-export interface LastRuns {
-  [id: string]: Date;
-}
+export type LastRuns = Record<string, Date>;
 
 const filePath = `${paths.config}/delays.json`;
 
