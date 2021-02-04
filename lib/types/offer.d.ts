@@ -17,6 +17,6 @@ export type Offer = {
     discountPrice: number;
     discountPercentage: number;
   };
-}
+};
 
-export type OfferDiscount = NonNullable<Offer['discount']>;
+export type OfferDiscount = NonNullable<Offer["discount"]>;

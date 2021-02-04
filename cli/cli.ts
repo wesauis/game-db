@@ -80,25 +80,27 @@ delays.update(lastRuns, results.providers);
 
 if (args.json) {
   console.log(JSON.stringify(results));
+  Deno.exit(0);
+}
+
+if (!results.offers.lenght) {
+  console.log("no games found");
+  Deno.exit(0);
+}
+
+const offers = Object
+  .values(results.offers)
+  .flat()
+  // order: free-forever, 100 - 0
+  .sort((offer0, offer1) => {
+    const d0 = !offer0.price ? 101 : offer0.discount?.discountPercentage || 100;
+    const d1 = !offer1.price ? 101 : offer1.discount?.discountPercentage || 100;
+
+    return d1 - d0;
+  });
+
+if (args.html) {
+  for (const line of tableHTML(offers)) console.log(line);
 } else {
-  const offers = Object
-    .values(results.offers)
-    .flat()
-    // order: free-forever, 100 - 0
-    .sort((offer0, offer1) => {
-      const d0 = !offer0.price
-        ? 101
-        : offer0.discount?.discountPercentage || 100;
-      const d1 = !offer1.price
-        ? 101
-        : offer1.discount?.discountPercentage || 100;
-
-      return d1 - d0;
-    });
-
-  if (args.html) {
-    for (const line of tableHTML(offers)) console.log(line);
-  } else {
-    for (const line of table(offers)) console.log(line);
-  }
+  for (const line of table(offers)) console.log(line);
 }
