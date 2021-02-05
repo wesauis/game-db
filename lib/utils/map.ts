@@ -10,9 +10,11 @@ export type Mapper<F, T> = (
  * @param from 
  * @param mapper 
  */
+// TODO F just need to have to be mappable
 export function map<F, T>(from: F[], mapper: Mapper<F, T>) {
   const to: T[] = [];
 
+  // TODO use a for loop
   from.forEach((value, index, array) => {
     const mappedValue = mapper(value, index, array);
 

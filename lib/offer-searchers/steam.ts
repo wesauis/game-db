@@ -45,7 +45,7 @@ const toOffer: Mapper<Element, Offer> = (element) => {
     price: parseNum(originalPrice),
     discount: {
       discountPrice: parseNum(discountPrice),
-      discountPercentage: parseNum($discount?.textContent),
+      discountPercentage: parseNum($discount?.textContent) * -1,
     },
   };
 };
