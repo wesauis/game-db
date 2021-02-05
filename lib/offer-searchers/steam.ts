@@ -1,12 +1,7 @@
 import type { Element } from "../deps.ts";
 import type { Offer, OfferSearcher } from "../types/Offer.d.ts";
 import { map, Mapper } from "../utils/map.ts";
-import {
-  parseElements,
-  parseHTML,
-  parseNum,
-  parseResJson,
-} from "../utils/parsers.ts";
+import { parseHTML, parseNum, parseResJson } from "../utils/parsers.ts";
 
 const RESULTS_PER_PAGE = 100;
 
@@ -86,7 +81,8 @@ export const steam: OfferSearcher = async (limit = 800) => {
   }
 
   const html = parseHTML(`<body>${htmlRows.join(" ")}</body>`);
-  const elements = parseElements(html.querySelectorAll(".search_result_row"));
 
-  return map(elements, toOffer);
+  const elements = html.querySelectorAll(".search_result_row");
+
+  return map(elements as unknown as ArrayLike<Element>, toOffer);
 };

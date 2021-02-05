@@ -1,4 +1,4 @@
-import type { Element, HTMLDocument, NodeList } from "../deps.ts";
+import type { HTMLDocument } from "../deps.ts";
 import { DOMParser } from "../deps.ts";
 
 /** Parses the reponse body as json if `reponse.ok` throws the response or the error otherwise
@@ -98,10 +98,4 @@ export function parseHTML(text: string): HTMLDocument {
   if (html) return html;
 
   throw new Error("invalid html");
-}
-
-// TODO(wesauis): generator, iterable?
-/** Converts a nodelist into a array */
-export function parseElements(nodeList: NodeList): Element[] {
-  return Array.from(nodeList as Iterable<Element>);
 }

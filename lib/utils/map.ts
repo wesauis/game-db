@@ -1,7 +1,6 @@
 export type Mapper<F, T> = (
   value: F,
   index: number,
-  array: F[],
 ) => T | undefined | null;
 
 /**
@@ -10,18 +9,16 @@ export type Mapper<F, T> = (
  * @param from 
  * @param mapper 
  */
-// TODO F just need to have to be mappable
-export function map<F, T>(from: F[], mapper: Mapper<F, T>) {
+export function map<F, T>(from: ArrayLike<F>, mapper: Mapper<F, T>) {
   const to: T[] = [];
 
-  // TODO use a for loop
-  from.forEach((value, index, array) => {
-    const mappedValue = mapper(value, index, array);
+  for (let index = 0; index < from.length; index += 1) {
+    const value = mapper(from[index], index);
 
-    if (mappedValue != null) {
-      to.push(mappedValue);
+    if (value != null) {
+      to.push(value);
     }
-  });
+  }
 
   return to;
 }
