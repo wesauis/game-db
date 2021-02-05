@@ -1,3 +1,5 @@
+export const RESULTS_PER_PAGE = 250;
+
 export const EPIC_API_URL = "https://www.epicgames.com/graphql";
 
 export const EPIC_GRAPHQL_QUERY = `query searchStoreQuery(
