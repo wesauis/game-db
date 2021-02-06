@@ -1,3 +1,5 @@
+export type Categories = "free" | "discounted";
+
 export interface EpicPage {
   data: {
     Catalog: {

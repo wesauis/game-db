@@ -19,4 +19,4 @@ export type Offer = {
   };
 };
 
-export type OfferDiscount = NonNullable<Offer["discount"]>;
+export type OfferSearcher = (limit?: number) => Promise<Offer[]>;

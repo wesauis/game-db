@@ -1,11 +1,11 @@
-import type { Element, HTMLDocument, NodeList } from "../deps.ts";
+import type { HTMLDocument } from "../deps.ts";
 import { DOMParser } from "../deps.ts";
 
 /** Parses the reponse body as json if `reponse.ok` throws the response or the error otherwise
  * 
  * ```ts
  * try {
- *   const json = fetch('someapi.com')
+ *   const json = await fetch('someapi.com')
  *     .then(parseResJson) as Type
  * } catch(error) {
  *   if (error instanceOf Error) {
@@ -28,8 +28,7 @@ export function parseResJson(res: Response): Promise<unknown> {
  * 
  * ```ts
  * try {
- *   const text = fetch('example.com')
- *     .then(parseResText) as Type
+ *   const text = await fetch('example.com').then(parseResText)
  * } catch(error) {
  *   if (error instanceOf Error) {
  *     // network error
@@ -49,7 +48,7 @@ export function parseResText(res: Response): Promise<string> {
 
 /** Converts a string into a number
  * 
- * Ignores all non numbers and extra commas
+ * Ignores all non numbers and extra commas or dots
  * 
  * If NaN will throw a error
  * 
@@ -57,24 +56,36 @@ export function parseResText(res: Response): Promise<string> {
  * parseNum('USD 3.000,6')// => 3000.6
  * ```
  */
-export function parseNum(str: string | null) {
-  // remove non numbers and commas
-  let normalized = str?.replaceAll(/[^0-9,]+/g, "");
+export function parseNum(str?: string) {
+  if (str) {
+    let chars = str.replace(/[^\d.,-]/g, "").split("");
 
-  // replace last comma with a dot
-  const index = normalized?.lastIndexOf(",");
-  if (index != null && index !== -1) {
-    const l = normalized!.substring(0, index);
-    const r = normalized!.substring(index + 1);
-    normalized = `${l}.${r}`;
+    const negative = chars[0] === "-";
+    chars = chars.filter((char) => char !== "-");
+
+    const normalized = [];
+    let hasDot = false;
+    for (const char of chars.reverse()) {
+      const isDot = char === "." || char == ",";
+
+      if (!isDot) normalized.unshift(char);
+
+      if (isDot && !hasDot) {
+        normalized.unshift(".");
+        hasDot = true;
+      }
+    }
+
+    if (negative) {
+      normalized.unshift("-");
+    }
+
+    str = normalized.join("");
   }
 
-  // remove extra commas
-  normalized = normalized?.replaceAll(/,/g, "");
+  const parsed = Number(str);
 
-  const parsed = Number(normalized);
-
-  if (isNaN(parsed)) throw new Error(`number format exception: ${normalized}`);
+  if (isNaN(parsed)) throw new Error(`number format exception: ${str}`);
 
   return parsed;
 }
@@ -87,9 +98,4 @@ export function parseHTML(text: string): HTMLDocument {
   if (html) return html;
 
   throw new Error("invalid html");
-}
-
-/** Converts a nodelist into a array */
-export function parseElements(nodeList: NodeList): Element[] {
-  return Array.from(nodeList as Iterable<Element>);
 }

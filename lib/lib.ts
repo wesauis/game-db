@@ -1,3 +1,2 @@
-export { OfferProvider } from "./offer-provider.ts";
-export { default as providers } from "./provider-registry.ts";
-export type { Offer } from "./types/Offer.d.ts";
+export * as searchers from "./offer-searchers/mod.ts";
+export type { Offer, OfferSearcher } from "./types/Offer.d.ts";
