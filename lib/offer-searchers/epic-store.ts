@@ -95,7 +95,7 @@ type EpicStoreSearcher = (
   category: Categories,
 ) => Promise<Offer[]>;
 
-const epicStore: EpicStoreSearcher = async (limit = Infinity, category) => {
+const epicStore: EpicStoreSearcher = async (limit, category) => {
   const products: EpicProduct[] = [];
 
   try {
@@ -127,10 +127,10 @@ const epicStore: EpicStoreSearcher = async (limit = Infinity, category) => {
   return map(products, (product) => toOffer(product, category));
 };
 
-export const epicStoreFree: OfferSearcher = async (limit) => {
-  return await epicStore(limit, "free");
+export const epicStoreFree: OfferSearcher = (limit = Infinity) => {
+  return epicStore(limit, "free");
 };
 
-export const epicStoreDiscounted: OfferSearcher = async (limit) => {
-  return await epicStore(limit, "discounted");
+export const epicStoreDiscounted: OfferSearcher = (limit = Infinity) => {
+  return epicStore(limit, "discounted");
 };

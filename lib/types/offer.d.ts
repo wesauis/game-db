@@ -19,4 +19,4 @@ export type Offer = {
   };
 };
 
-export type OfferSearcher = (limit: number) => Promise<Offer[]>;
+export type OfferSearcher = (limit?: number) => Promise<Offer[]>;

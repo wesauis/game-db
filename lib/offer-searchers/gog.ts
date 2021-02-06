@@ -42,7 +42,7 @@ const toOffer: MapToOffer = (product, category) => {
   };
 };
 
-async function gog(limit = Infinity, category: Categories): Promise<Offer[]> {
+async function gog(limit: number, category: Categories): Promise<Offer[]> {
   const products: GoGProduct[] = [];
 
   try {
@@ -71,6 +71,10 @@ async function gog(limit = Infinity, category: Categories): Promise<Offer[]> {
   return map(products, (product) => toOffer(product, category));
 }
 
-export const gogFree: OfferSearcher = (limit) => gog(limit, "free");
+export const gogFree: OfferSearcher = (limit = Infinity) => {
+  return gog(limit, "free");
+};
 
-export const gogDiscounted: OfferSearcher = (limit) => gog(limit, "discounted");
+export const gogDiscounted: OfferSearcher = (limit = Infinity) => {
+  return gog(limit, "discounted");
+};
