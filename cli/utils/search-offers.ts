@@ -1,4 +1,4 @@
-import type { Offer, OfferSearcher } from "./deps.ts";
+import type { Offer, OfferSearcher } from "../deps.ts";
 
 export async function searchOffers(
   searchers: Record<string, OfferSearcher>,

@@ -1,6 +1,6 @@
 import { OfferSearcher } from "../../lib/lib.ts";
-import { readJSON, writeJSON } from "./json.ts";
-import { paths } from "./paths.ts";
+import { readJSON, writeJSON } from "../utils/json.ts";
+import { paths } from "../utils/paths.ts";
 
 type LastRuns = Record<string, number>;
 type Searchers = Record<string, OfferSearcher>;

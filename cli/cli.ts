@@ -4,7 +4,7 @@ import { colors, parseArgs, searchers } from "./deps.ts";
 import { tableHTML } from "./formatters/table-html.ts";
 import { table } from "./formatters/table.ts";
 import { removeDelayed } from "./persistance/delays.ts";
-import { searchOffers } from "./search-offers.ts";
+import { searchOffers } from "./utils/search-offers.ts";
 
 function showHelpAndExit() {
   console.log(
@@ -43,10 +43,10 @@ const offers = Object
   .flat()
   // order: free-forever, 100 - 0
   .sort((offer0, offer1) => {
-    const d0 = !offer0.price ? 101 : offer0.discount?.discountPercentage || 100;
-    const d1 = !offer1.price ? 101 : offer1.discount?.discountPercentage || 100;
+    const p0 = !offer0.price ? 101 : offer0.discount?.discountPercentage || 100;
+    const p1 = !offer1.price ? 101 : offer1.discount?.discountPercentage || 100;
 
-    return d1 - d0;
+    return p1 - p0;
   });
 
 if (args.json) {
