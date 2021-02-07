@@ -3,6 +3,7 @@ if (!import.meta.main) throw new Error("cli only");
 import { colors, parseArgs, searchers } from "./deps.ts";
 import { tableHTML } from "./formatters/table-html.ts";
 import { table } from "./formatters/table.ts";
+import { removeDelayed } from "./persistance/delays.ts";
 import { searchOffers } from "./search-offers.ts";
 
 function showHelpAndExit() {
@@ -35,9 +36,8 @@ const args = parseArgs(Deno.args, {
 
 if (args.help) showHelpAndExit();
 
-const results = await searchOffers(
-  searchers, /* TODO delays.filter(searches) */
-);
+const results = await searchOffers(removeDelayed(searchers));
+// TODO cache the results and use the cached for the providers that are not used
 const offers = Object
   .values(results)
   .flat()

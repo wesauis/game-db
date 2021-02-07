@@ -1,25 +1,32 @@
-import { existsSync } from "../deps.ts";
-import { dateReviver, readJSON, writeJSON } from "./json.ts";
+import { OfferSearcher } from "../../lib/lib.ts";
+import { readJSON, writeJSON } from "./json.ts";
 import { paths } from "./paths.ts";
 
-export type LastRuns = Record<string, Date>;
+type LastRuns = Record<string, number>;
+type Searchers = Record<string, OfferSearcher>;
 
-const filePath = `${paths.config}/delays.json`;
+const LAST_RUNS_JSON_PATH = `${paths.config}/delays.json`;
+const DELAY = 43200000; // 12 hours
 
-export function load(): LastRuns {
-  if (existsSync(filePath)) {
-    return readJSON<LastRuns>(filePath, dateReviver);
-  }
+export function removeDelayed(searchers: Searchers): Searchers {
+  const delays = readJSON<LastRuns>(LAST_RUNS_JSON_PATH) || {};
 
-  return {};
-}
+  const toRun: Searchers = {};
 
-export function update(lastRuns: LastRuns, providers: string[]) {
-  const now = new Date();
+  const now = Date.now();
+  Object.keys(searchers).forEach((id) => {
+    const lastRun = delays[id];
+    const canRun = !lastRun || lastRun + DELAY < now;
 
-  providers.forEach((id) => {
-    lastRuns[id] = now;
+    if (canRun) {
+      delays[id] = now;
+      toRun[id] = searchers[id];
+    } else {
+      console.warn(`search delayed for: ${id} `);
+    }
   });
 
-  writeJSON(filePath, lastRuns, { create: true });
+  writeJSON(LAST_RUNS_JSON_PATH, delays, { create: true });
+
+  return toRun;
 }

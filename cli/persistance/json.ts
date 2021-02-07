@@ -1,8 +1,12 @@
+import { existsSync } from "../deps.ts";
+
 export function readJSON<T>(
   filePath: string,
   // deno-lint-ignore no-explicit-any
   reviver?: (this: any, key: string, value: any) => any,
-): T {
+): T | undefined {
+  if (!existsSync(filePath)) return undefined;
+
   try {
     const sJSON = Deno.readTextFileSync(filePath);
     return JSON.parse(sJSON, reviver) as T;
