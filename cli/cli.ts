@@ -14,6 +14,7 @@ query offers and free games and show them
 ${colors.gray("OPTIONS:")}
   --help          show this help message
   --json          prints raw json to stdout
+  --jsonp         prints prettified json to stdout
   --html          prints html to stdout
   --run-all       run all registered providers
 
@@ -25,7 +26,7 @@ ${colors.gray("ENVIRONMENT:")}
 }
 
 const args = parseArgs(Deno.args, {
-  boolean: ["help", "json", "raw", "html", "run-all"] as const,
+  boolean: ["help", "json", "jsonp", "html", "run-all"] as const,
   unknown(arg) {
     console.warn(`unknown argument: '${arg}', use --help for help`);
 
@@ -37,8 +38,9 @@ if (args.help) showHelpAndExit();
 
 const results = await searchSortAndCacheOffers(args["run-all"]);
 
-if (args.json) {
-  console.log(JSON.stringify(results, undefined, args.raw ? undefined : 2));
+if (args.json || args.jsonp) {
+  const spaces = args.jsonp ? undefined : 2;
+  console.log(JSON.stringify(results, undefined, spaces));
   Deno.exit(0);
 }
 
