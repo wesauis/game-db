@@ -1,10 +1,9 @@
 if (!import.meta.main) throw new Error("cli only");
 
-import { colors, parseArgs, searchers } from "./deps.ts";
-import { tableHTML } from "./formatters/table-html.ts";
-import { table } from "./formatters/table.ts";
-import { removeDelayed } from "./persistance/delays.ts";
-import { searchOffers } from "./utils/search-offers.ts";
+import { colors, parseArgs } from "./deps.ts";
+import { tableHTML } from "./printers/table-html.ts";
+import { table } from "./printers/table.ts";
+import { searchSortAndCacheOffers } from "./utils/search-offers.ts";
 
 function showHelpAndExit() {
   console.log(
@@ -26,7 +25,7 @@ ${colors.gray("ENVIRONMENT:")}
 }
 
 const args = parseArgs(Deno.args, {
-  boolean: ["help", "json", "html", "run-all"] as const,
+  boolean: ["help", "json", "raw", "html", "run-all"] as const,
   unknown(arg) {
     console.warn(`unknown argument: '${arg}', use --help for help`);
 
@@ -36,31 +35,15 @@ const args = parseArgs(Deno.args, {
 
 if (args.help) showHelpAndExit();
 
-const results = await searchOffers(removeDelayed(searchers));
-// TODO cache the results and use the cached for the providers that are not used
-const offers = Object
-  .values(results)
-  .flat()
-  // order: free-forever, 100 - 0
-  .sort((offer0, offer1) => {
-    const p0 = !offer0.price ? 101 : offer0.discount?.discountPercentage || 100;
-    const p1 = !offer1.price ? 101 : offer1.discount?.discountPercentage || 100;
-
-    return p1 - p0;
-  });
+const results = await searchSortAndCacheOffers(args["run-all"]);
 
 if (args.json) {
-  console.log(JSON.stringify(offers));
-  Deno.exit(0);
-}
-
-if (!offers.length) {
-  console.log("no games found");
+  console.log(JSON.stringify(results, undefined, args.raw ? undefined : 2));
   Deno.exit(0);
 }
 
 if (args.html) {
-  for (const line of tableHTML(offers)) console.log(line);
+  for (const line of tableHTML(results)) console.log(line);
 } else {
-  for (const line of table(offers)) console.log(line);
+  for (const line of table(results)) console.log(line);
 }

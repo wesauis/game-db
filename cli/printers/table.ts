@@ -1,5 +1,6 @@
 import { colors, Offer } from "../deps.ts";
 import { colorize } from "../utils/colorize.ts";
+import { SortedSearchResults } from "../utils/search-offers.ts";
 
 function normalize(str: string): string {
   return str.replaceAll(/[^ -~]/g, "");
@@ -14,9 +15,14 @@ function padRight(str: string, size: number): string {
 
 const TITLE = 0, PRICE = 1;
 
-export function* table(offers: Offer[]) {
+export function* table(sortedResults: SortedSearchResults) {
   const widths: number[] = [5, 5];
   const rows: string[][] = [];
+
+  const offers = Object
+    .values(sortedResults)
+    .map((sortedOffers) => Object.values(sortedOffers._))
+    .flat();
 
   offers.forEach((offer) => {
     const title = normalize(offer.title);
