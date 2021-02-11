@@ -3,7 +3,7 @@ if (!import.meta.main) throw new Error("cli only");
 import { colors, parseArgs } from "./deps.ts";
 import { tableHTML } from "./printers/table-html.ts";
 import { table } from "./printers/table.ts";
-import { searchSortAndCacheOffers } from "./utils/search-offers.ts";
+import { searchAndCacheOffers } from "./search-offers.ts";
 
 function showHelpAndExit() {
   console.log(
@@ -36,7 +36,7 @@ const args = parseArgs(Deno.args, {
 
 if (args.help) showHelpAndExit();
 
-const results = await searchSortAndCacheOffers(args["run-all"]);
+const results = await searchAndCacheOffers(args["run-all"]);
 
 if (args.json || args.jsonp) {
   const spaces = args.jsonp ? undefined : 2;

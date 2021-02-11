@@ -1,4 +1,4 @@
-import { appPaths, existsSync } from "../deps.ts";
+import { appPaths, existsSync } from "./deps.ts";
 
 const paths = appPaths("game-db");
 

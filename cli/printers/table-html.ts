@@ -1,11 +1,11 @@
+import { SearchResults } from "../search-offers.ts";
 import { colorize } from "../utils/colorize.ts";
-import { SortedSearchResults } from "../utils/search-offers.ts";
 
 function normalize(str: string): string {
   return str.replaceAll(/[^ -~]/g, "");
 }
 
-export function* tableHTML(sortedResults: SortedSearchResults) {
+export function* tableHTML(searchResults: SearchResults) {
   // skeleton css
   yield `<head>
   <title>game-db results</title>
@@ -20,10 +20,7 @@ export function* tableHTML(sortedResults: SortedSearchResults) {
     </thead>
     <tbody>`;
 
-  const offers = Object
-    .values(sortedResults)
-    .map((sortedOffers) => Object.values(sortedOffers._))
-    .flat();
+  const offers = Object.values(searchResults).flat();
 
   // content
   for (const offer of offers) {
