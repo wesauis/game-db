@@ -1,6 +1,6 @@
 import { ObjectHash, Offer, searchers } from "../deps.ts";
 import { HashMap, toHashMap } from "./hash-map.ts";
-import { readJSON } from "./json.ts";
+import { readJSON, writeJSON } from "./json.ts";
 import { paths } from "./paths.ts";
 import { filterDelayed } from "./search-delays.ts";
 
@@ -32,10 +32,6 @@ type SortedOffers = {
   news: Record<ObjectHash, number>;
   /** best offers, classified by how high is the discount (ex: 100%) and/or how mutch is the discount (ex: USD 250,00) */
   bestDeals: ObjectHash[];
-  /** all discounted offers */
-  discounted: ObjectHash[];
-  /** all free-always offers */
-  free: ObjectHash[];
 };
 
 function sortOffers(
@@ -51,8 +47,6 @@ function sortOffers(
   const ending: SortedOffers["ending"] = [];
   const news: SortedOffers["news"] = {};
   const bestDeals: SortedOffers["bestDeals"] = [];
-  const discounted: SortedOffers["discounted"] = [];
-  const free: SortedOffers["free"] = [];
 
   for (const hash in offers) {
     const offer = offers[hash];
@@ -81,12 +75,6 @@ function sortOffers(
       if (discountPercentage > 85 || offer.price - discountPrice > 99) {
         bestDeals.push(hash);
       }
-
-      // discounted
-      discounted.push(hash);
-    } else {
-      // free
-      free.push(hash);
     }
   }
 
@@ -95,8 +83,6 @@ function sortOffers(
     ending,
     news,
     bestDeals,
-    free,
-    discounted,
   };
 }
 
@@ -146,6 +132,8 @@ export async function searchSortAndCacheOffers(
   for (const id of notRun) {
     sortedResults[id] = sortedResultsCache[id] || sortedOffersDefaults;
   }
+
+  writeJSON(RESULT_CACHE, sortedResults, { create: true });
 
   return sortedResults;
 }
