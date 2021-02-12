@@ -10,7 +10,7 @@ function showHelpAndExit() {
   console.log(
     `Usage: game-db ${colors.gray("[OPTIONS]")}
 
-query offers and free games and show them
+find the best game offers from your terminal
 
 ${colors.gray("OPTIONS:")}
   --help          show this help message
@@ -56,7 +56,7 @@ const searchResults = await searchOffers(
 );
 
 if (args.json || args.jsonp) {
-  const spaces = args.jsonp ? undefined : 2;
+  const spaces = args.jsonp ? 2 : undefined;
   console.log(JSON.stringify(searchResults, undefined, spaces));
   Deno.exit(0);
 }

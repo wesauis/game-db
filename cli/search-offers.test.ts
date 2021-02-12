@@ -1,9 +1,9 @@
 import { assertEquals } from "https://deno.land/std@0.84.0/testing/asserts.ts";
 import { Offer } from "./deps.ts";
-import { LastRuns, searchOffers, SearchResults } from "./search-offers.ts";
+import { LastRuns, searchOffers } from "./search-offers.ts";
 import { readJSON } from "./utils/json.ts";
 
-Deno.test("search offers", async () => {
+Deno.test("search and cache offers", async () => {
   const tempDir = await Deno.makeTempDir({ prefix: "game-db" });
 
   const lastRunsFilePath = `${tempDir}/lastRuns.json`;
@@ -15,18 +15,22 @@ Deno.test("search offers", async () => {
     price: 0,
   }];
 
-  const searchResults = await searchOffers(
-    { empty: () => Promise.resolve(offers) },
-    true,
-    /* 12 hours */ 0,
-    lastRunsFilePath,
-    resultsFilePath,
-  );
-
   const expectedResults = { empty: offers };
 
   assertEquals(
-    searchResults,
+    await searchOffers(
+      /* searcher with a known name and result */ {
+        empty: (limit = Infinity) => {
+          assertEquals(limit, 1, "limit was recieved by the searcher");
+          return Promise.resolve(offers);
+        },
+      },
+      /* runAll */ true,
+      /* does not matter because of the runAll */ Infinity,
+      /* place to store the lastRuns */ lastRunsFilePath,
+      /* place to store the results for the next test */ resultsFilePath,
+      /* limit to be used/tested */ 1,
+    ),
     expectedResults,
     "was run",
   );
@@ -38,8 +42,16 @@ Deno.test("search offers", async () => {
   );
 
   assertEquals(
-    readJSON<SearchResults>(resultsFilePath),
+    await searchOffers(
+      /* searcher with a known name and result */ {
+        empty: () => Promise.reject(new Error("")),
+      },
+      /* check the lastRuns.json */ false,
+      /* shoud not run the provider */ Infinity,
+      /* place to store the lastRuns */ lastRunsFilePath,
+      /* place to store the results for the next test */ resultsFilePath,
+    ),
     expectedResults,
-    "results cache created and has the offers",
+    "results cache created, has the offers, and the cache was used instead of searching again",
   );
 });
