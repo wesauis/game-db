@@ -1,9 +1,10 @@
 if (!import.meta.main) throw new Error("cli only");
 
-import { colors, parseArgs } from "./deps.ts";
+import { existsSync } from "https://deno.land/std@0.85.0/fs/exists.ts";
+import { appPaths, colors, parseArgs, searchers } from "./deps.ts";
 import { tableHTML } from "./printers/table-html.ts";
 import { table } from "./printers/table.ts";
-import { searchAndCacheOffers } from "./search-offers.ts";
+import { searchOffers } from "./search-offers.ts";
 
 function showHelpAndExit() {
   console.log(
@@ -36,16 +37,32 @@ const args = parseArgs(Deno.args, {
 
 if (args.help) showHelpAndExit();
 
-const results = await searchAndCacheOffers(args["run-all"]);
+const paths = appPaths("game-db");
+
+if (!existsSync(paths.config)) {
+  await Deno.mkdir(paths.config, { recursive: true });
+}
+
+if (!existsSync(paths.cache)) {
+  await Deno.mkdir(paths.cache, { recursive: true });
+}
+
+const searchResults = await searchOffers(
+  searchers,
+  args["run-all"],
+  /* 12 hours */ 43200000,
+  `${paths.config}/lastRuns.json`,
+  `${paths.cache}/results.json`,
+);
 
 if (args.json || args.jsonp) {
   const spaces = args.jsonp ? undefined : 2;
-  console.log(JSON.stringify(results, undefined, spaces));
+  console.log(JSON.stringify(searchResults, undefined, spaces));
   Deno.exit(0);
 }
 
 if (args.html) {
-  for (const line of tableHTML(results)) console.log(line);
+  for (const line of tableHTML(searchResults)) console.log(line);
 } else {
-  for (const line of table(results)) console.log(line);
+  for (const line of table(searchResults)) console.log(line);
 }
