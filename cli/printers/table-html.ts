@@ -1,11 +1,18 @@
-import { SearchResults } from "../search-offers.ts";
+import { CategorizedResults, OfferAndCategory } from "../utils/categories.ts";
 import { colorize } from "../utils/colorize.ts";
 
 function normalize(str: string): string {
   return str.replaceAll(/[^ -~]/g, "");
 }
 
-export function* tableHTML(searchResults: SearchResults) {
+const CATEGORY: Record<NonNullable<OfferAndCategory["category"]>, string> = {
+  ending: "  ending  ".fontcolor("darkorange"),
+  "best-offer": "best-offer".fontcolor("purple"),
+  free: "   free   ".fontcolor("gray"),
+  discounted: "discounted".fontcolor("darkblue"),
+};
+
+export function* tableHTML(searchResults: CategorizedResults) {
   // skeleton css
   yield `<head>
   <title>game-db results</title>
@@ -13,14 +20,28 @@ export function* tableHTML(searchResults: SearchResults) {
 </head>`;
 
   // table start
-  yield `<body><table style="width:100%">
+  yield `<body style='background-color:#121212;filter: invert(1) hue-rotate(180deg);'>
+    <table style="width:100%">
     <thead>
+      <th>Category</th>
       <th>Title</th>
       <th>Price</th>
     </thead>
     <tbody>`;
 
-  const offers = Object.values(searchResults).flat();
+  const offers = Object
+    .values(searchResults)
+    .flat() // order: free-forever, 100 - 0
+    .sort((offer0, offer1) => {
+      const p0 = !offer0.price
+        ? 101
+        : offer0.discount?.discountPercentage || 100;
+      const p1 = !offer1.price
+        ? 101
+        : offer1.discount?.discountPercentage || 100;
+
+      return p1 - p0;
+    });
 
   // content
   for (const offer of offers) {
@@ -41,7 +62,9 @@ export function* tableHTML(searchResults: SearchResults) {
       } ${`<span style="color: rgb(${r},${g},${b})">-${discountPercentage}%</span>`}`;
     }
 
-    yield `<tr><th>${normalize(title)}</th><th>${formattedPrice}</tr></th>`;
+    yield `<tr><th>${CATEGORY[offer.category!]}</th><th>${
+      normalize(title)
+    }</th><th>${formattedPrice}</tr></th>`;
   }
 
   // table end
