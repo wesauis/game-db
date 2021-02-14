@@ -32,8 +32,8 @@ ${colors.gray("OPTIONS:")}
                                                  ↪ ms: millisseconds to end, defaults to 36 hours
   --best-offers [hide|([percentage][,amount])]  show best offers, enabled by default
                                                  ↪ hide: disables
-                                                 ↪ percentage: greater then this is a good offer, defaults to 90
-                                                 ↪ amount: saved ammount, greater then this is a good offer, defaults to 80
+                                                 ↪ percentage: greater/equal then this is a good offer, defaults to 90
+                                                 ↪ amount: saved ammount, greater/equal then this is a good offer, defaults to 80
   --searcher-id-match <regex>                   filters what provider to be used using a regex to test against the provider id
 
 ${colors.gray("ENVIRONMENT:")}
