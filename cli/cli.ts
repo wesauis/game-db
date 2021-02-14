@@ -6,6 +6,7 @@ import { tableHTML } from "./printers/table-html.ts";
 import { table } from "./printers/table.ts";
 import { searchOffers } from "./search-offers.ts";
 import { parseArgs } from "./utils/args.ts";
+import { categorize } from "./utils/categories.ts";
 
 const args = parseArgs({
   endingms: 36 * 60 * 60 * 1000,
@@ -68,19 +69,21 @@ const searchResults = await searchOffers(
   `${paths.cache}/results.json`,
 );
 
-// TODO args.bestOffers;
-// TODO args.endingms;
-// TODO args.discounted;
-// TODO args.free;
+const categorized = categorize(searchResults, {
+  free: args.free,
+  discounted: args.discounted,
+  bestOffers: args.bestOffers,
+  endingms: args.endingms,
+});
 
 if (args.json) {
   const spaces = args.json == "pretty" ? 2 : undefined;
-  console.log(JSON.stringify(searchResults, undefined, spaces));
+  console.log(JSON.stringify(categorized, undefined, spaces));
   Deno.exit(0);
 }
 
 if (args.html) {
-  for (const line of tableHTML(searchResults)) console.log(line);
+  for (const line of tableHTML(categorized)) console.log(line);
 } else {
-  for (const line of table(searchResults)) console.log(line);
+  for (const line of table(categorized)) console.log(line);
 }
