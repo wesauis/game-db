@@ -1,5 +1,5 @@
 import type { Element } from "../deps.ts";
-import type { Offer, OfferSearcher } from "../types/Offer.d.ts";
+import type { Offer, OfferSearcher } from "../types/offer.d.ts";
 import { map, Mapper } from "../utils/map.ts";
 import { parseHTML, parseNum, parseResJson } from "../utils/parsers.ts";
 

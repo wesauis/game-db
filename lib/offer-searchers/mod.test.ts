@@ -1,5 +1,5 @@
 import { assert } from "https://deno.land/std@0.85.0/testing/asserts.ts";
-import { OfferSearcher } from "../types/Offer.d.ts";
+import { OfferSearcher } from "../types/offer.d.ts";
 import * as searchers from "./mod.ts";
 
 // limits results to 0 => so only the first page is used

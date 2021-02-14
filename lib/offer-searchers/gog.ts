@@ -1,4 +1,4 @@
-import type { Offer, OfferSearcher } from "../types/Offer.d.ts";
+import type { Offer, OfferSearcher } from "../types/offer.d.ts";
 import { map } from "../utils/map.ts";
 import { parseResJson } from "../utils/parsers.ts";
 import type { GoGPage, GoGProduct } from "./gog.d.ts";
