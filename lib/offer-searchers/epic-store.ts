@@ -53,8 +53,8 @@ const extractPricing: MapToPricing = (product, category) => {
   return [
     price,
     {
-      startDate: new Date(product.effectiveDate),
-      endDate: new Date(endDate),
+      startDate: new Date(product.effectiveDate).getTime(),
+      endDate: new Date(endDate).getTime(),
       discountPrice: discountPrice / scale,
       discountPercentage: Math.round(discount / originalPrice * 100),
     },
