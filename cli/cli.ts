@@ -50,13 +50,28 @@ if (!existsSync(paths.cache)) {
   await Deno.mkdir(paths.cache, { recursive: true });
 }
 
+const toRun = { ...searchers };
+if (args.searcherIdMatch) {
+  for (const id in toRun) {
+    // remove searchers that doesn't match the regex
+    if (!args.searcherIdMatch.test(id)) {
+      delete toRun[id as keyof typeof toRun];
+    }
+  }
+}
+
 const searchResults = await searchOffers(
-  searchers,
+  toRun,
   args.force,
   /* 12 hours */ 43200000,
   `${paths.config}/lastRuns.json`,
   `${paths.cache}/results.json`,
 );
+
+// TODO args.bestOffers;
+// TODO args.endingms;
+// TODO args.discounted;
+// TODO args.free;
 
 if (args.json) {
   const spaces = args.json == "pretty" ? 2 : undefined;

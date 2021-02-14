@@ -80,7 +80,7 @@ export function _searcherIdMatch(arg: string | undefined): RegExp | undefined {
   try {
     if (arg.length === 0) throw new SyntaxError();
 
-    return new RegExp(arg);
+    return new RegExp(arg, "i");
   } catch (err) {
     if (err instanceof SyntaxError) {
       throw new InvalidArgument(
