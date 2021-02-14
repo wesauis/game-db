@@ -1,4 +1,4 @@
-import { assertEquals } from "https://deno.land/std@0.84.0/testing/asserts.ts";
+import { assertEquals } from "https://deno.land/std@0.85.0/testing/asserts.ts";
 import { Offer } from "./deps.ts";
 import { LastRuns, searchOffers } from "./search-offers.ts";
 import { readJSON } from "./utils/json.ts";

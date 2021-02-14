@@ -14,14 +14,14 @@ type Search = {
  * 
  * @param searchers all avaliable searcher by id
  * @param limit OfferSearcher limit arg
- * @param runAll true if shoud run all searchers
+ * @param force true if shoud run all searchers
  * @param timeBetweenSearches time to wait to run the searcher again
  * @param lastRunsFilePath
  * @param resultsFilePath 
  */
 export async function searchOffers(
   searchers: Record<string, OfferSearcher>,
-  runAll: boolean,
+  force: boolean,
   timeBetweenSearches: number,
   lastRunsFilePath: string,
   resultsFilePath: string,
@@ -39,7 +39,7 @@ export async function searchOffers(
     const lastRun = lastRuns[id];
     const canRun = !lastRun || lastRun + timeBetweenSearches < now;
 
-    if (runAll || canRun) {
+    if (force || canRun) {
       searches.push({
         id,
         search: searchers[id](limit),

@@ -19,7 +19,19 @@ export function* table(searchResults: SearchResults) {
   const widths: number[] = [5, 5];
   const rows: string[][] = [];
 
-  const offers = Object.values(searchResults).flat();
+  const offers = Object
+    .values(searchResults)
+    .flat() // order: free-forever, 100 - 0
+    .sort((offer0, offer1) => {
+      const p0 = !offer0.price
+        ? 101
+        : offer0.discount?.discountPercentage || 100;
+      const p1 = !offer1.price
+        ? 101
+        : offer1.discount?.discountPercentage || 100;
+
+      return p1 - p0;
+    });
 
   offers.forEach((offer) => {
     const title = normalize(offer.title);
