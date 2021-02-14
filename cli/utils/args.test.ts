@@ -37,7 +37,7 @@ Deno.test("json", () => {
 
 Deno.test("match-regex", () => {
   assertEquals(_searcherIdMatch(undefined), undefined, "no arg");
-  assertEquals(_searcherIdMatch(".*"), /.*/, "regex");
+  assertEquals(_searcherIdMatch(".*"), /.*/i, "regex");
 
   assertThrows(
     () => {
