@@ -1,4 +1,5 @@
-import { colors, Offer } from "../deps.ts";
+import { colors } from "../deps.ts";
+import { CategorizedResults, OfferAndCategory } from "../utils/categories.ts";
 import { colorize } from "../utils/colorize.ts";
 
 function normalize(str: string): string {
@@ -14,9 +15,30 @@ function padRight(str: string, size: number): string {
 
 const TITLE = 0, PRICE = 1;
 
-export function* table(offers: Offer[]) {
+const CATEGORY: Record<NonNullable<OfferAndCategory["category"]>, string> = {
+  ending: colors.yellow("  ending  "),
+  "best-offer": colors.magenta("best-offer"),
+  free: colors.gray("   free   "),
+  discounted: colors.cyan("discounted"),
+};
+
+export function* table(searchResults: CategorizedResults) {
   const widths: number[] = [5, 5];
-  const rows: string[][] = [];
+  const rows: [string, string, string, string][] = [];
+
+  const offers = Object
+    .values(searchResults)
+    .flat() // order: free-forever, 100 - 0
+    .sort((offer0, offer1) => {
+      const p0 = !offer0.price
+        ? 101
+        : offer0.discount?.discountPercentage || 100;
+      const p1 = !offer1.price
+        ? 101
+        : offer1.discount?.discountPercentage || 100;
+
+      return p1 - p0;
+    });
 
   offers.forEach((offer) => {
     const title = normalize(offer.title);
@@ -44,7 +66,7 @@ export function* table(offers: Offer[]) {
       formattedPrice = `${price} ${colors.rgb24(percentage, { r, g, b })}`;
     }
 
-    rows.push([title, formattedPrice, offer.link]);
+    rows.push([CATEGORY[offer.category!], title, formattedPrice, offer.link]);
   });
 
   const [titleW, priceW] = widths;
@@ -52,14 +74,16 @@ export function* table(offers: Offer[]) {
   const COLUMN_SEPARATOR = colors.dim(" | ");
 
   yield [
+    "Category  ",
     "Title".padEnd(titleW),
     "Price".padEnd(priceW),
     "Link",
   ].map(colors.bold)
     .join(COLUMN_SEPARATOR);
 
-  for (const [title, price, link] of rows) {
+  for (const [category, title, price, link] of rows) {
     yield [
+      category,
       title.padEnd(titleW),
       padRight(price, priceW),
       link,

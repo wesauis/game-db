@@ -12,8 +12,8 @@ export type Offer = {
   price: number;
   /** discount, undefined if free forever */
   discount?: {
-    startDate?: Date;
-    endDate?: Date;
+    startDate?: number;
+    endDate?: number;
     discountPrice: number;
     discountPercentage: number;
   };
